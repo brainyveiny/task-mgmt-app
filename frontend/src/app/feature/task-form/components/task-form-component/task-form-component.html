@@ -1,0 +1,62 @@
+<div class="form-page">
+    <div class="form-card">
+        <a class="back-link" routerLink="/dashboard">&larr; Back</a>
+        <h2>{{ isEditMode ? 'Edit Task' : 'Create Task' }}</h2>
+        <p class="form-subtitle">{{ isEditMode ? 'Update task details below' : 'Fill in the details for your new task'
+            }}</p>
+
+        <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+        <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+
+        <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" novalidate>
+
+            <div class="form-group">
+                <label for="task-title">Title *</label>
+                <input id="task-title" type="text" formControlName="title" placeholder="e.g., Complete project report"
+                    [class.invalid]="title.invalid && title.touched" />
+                <span class="field-error" *ngIf="title.invalid && title.touched">
+                    Title must be at least 3 characters.
+                </span>
+            </div>
+
+            <div class="form-group">
+                <label for="task-description">Description</label>
+                <textarea id="task-description" formControlName="description" rows="4"
+                    placeholder="Optional task description..."></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="task-status">Status</label>
+                    <select id="task-status" formControlName="status">
+                        <option value="TODO">To Do</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="DONE">Done</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="task-priority">Priority</label>
+                    <select id="task-priority" formControlName="priority">
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HIGH">High</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="task-due-date">Due Date</label>
+                <input id="task-due-date" type="date" formControlName="due_date" [min]="minDate" />
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" (click)="cancel()">Cancel</button>
+                <button type="submit" class="btn-primary" [disabled]="taskForm.invalid || loading">
+                    <span *ngIf="!loading">{{ isEditMode ? 'Update Task' : 'Create Task' }}</span>
+                    <span *ngIf="loading">Saving...</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
