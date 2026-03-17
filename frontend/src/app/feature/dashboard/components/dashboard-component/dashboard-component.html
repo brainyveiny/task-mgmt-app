@@ -50,20 +50,9 @@
                      id="todo-list"
                      [cdkDropListConnectedTo]="['inprogress-list','done-list']"
                      (cdkDropListDropped)="onDrop($event, 'TODO')">
-                    <div class="task-card" *ngFor="let task of todoTasks" cdkDrag>
-                        <div class="task-top">
-                            <span class="task-title">{{ task.title }}</span>
-                            <span class="priority-badge" [ngClass]="getPriorityClass(task.priority)">
-                                {{ task.priority }}
-                            </span>
-                        </div>
-                        <p class="task-desc" *ngIf="task.description">{{ task.description }}</p>
-                        <p class="task-due" *ngIf="task.due_date">{{ task.due_date | date:'mediumDate' }}</p>
-                        <div class="task-actions">
-                            <button class="btn-edit" (click)="editTask(task.id)">Edit</button>
-                            <button class="btn-delete" (click)="deleteTask(task.id)">Delete</button>
-                        </div>
-                    </div>
+                    <ng-container *ngFor="let task of todoTasks">
+                        <ng-container *ngTemplateOutlet="taskCard; context: { $implicit: task }"></ng-container>
+                    </ng-container>
                 </div>
                 <div class="empty-col" *ngIf="todoTasks.length === 0">No tasks here</div>
             </div>
@@ -77,20 +66,9 @@
                      id="inprogress-list"
                      [cdkDropListConnectedTo]="['todo-list','done-list']"
                      (cdkDropListDropped)="onDrop($event, 'IN_PROGRESS')">
-                    <div class="task-card" *ngFor="let task of inProgressTasks" cdkDrag>
-                        <div class="task-top">
-                            <span class="task-title">{{ task.title }}</span>
-                            <span class="priority-badge" [ngClass]="getPriorityClass(task.priority)">
-                                {{ task.priority }}
-                            </span>
-                        </div>
-                        <p class="task-desc" *ngIf="task.description">{{ task.description }}</p>
-                        <p class="task-due" *ngIf="task.due_date">{{ task.due_date | date:'mediumDate' }}</p>
-                        <div class="task-actions">
-                            <button class="btn-edit" (click)="editTask(task.id)">Edit</button>
-                            <button class="btn-delete" (click)="deleteTask(task.id)">Delete</button>
-                        </div>
-                    </div>
+                    <ng-container *ngFor="let task of inProgressTasks">
+                        <ng-container *ngTemplateOutlet="taskCard; context: { $implicit: task }"></ng-container>
+                    </ng-container>
                 </div>
                 <div class="empty-col" *ngIf="inProgressTasks.length === 0">No tasks here</div>
             </div>
@@ -104,20 +82,9 @@
                      id="done-list"
                      [cdkDropListConnectedTo]="['todo-list','inprogress-list']"
                      (cdkDropListDropped)="onDrop($event, 'DONE')">
-                    <div class="task-card done-card" *ngFor="let task of doneTasks" cdkDrag>
-                        <div class="task-top">
-                            <span class="task-title done-title">{{ task.title }}</span>
-                            <span class="priority-badge" [ngClass]="getPriorityClass(task.priority)">
-                                {{ task.priority }}
-                            </span>
-                        </div>
-                        <p class="task-desc" *ngIf="task.description">{{ task.description }}</p>
-                        <p class="task-due" *ngIf="task.due_date">{{ task.due_date | date:'mediumDate' }}</p>
-                        <div class="task-actions">
-                            <button class="btn-edit" (click)="editTask(task.id)">Edit</button>
-                            <button class="btn-delete" (click)="deleteTask(task.id)">Delete</button>
-                        </div>
-                    </div>
+                    <ng-container *ngFor="let task of doneTasks">
+                        <ng-container *ngTemplateOutlet="taskCard; context: { $implicit: task, done: true }"></ng-container>
+                    </ng-container>
                 </div>
                 <div class="empty-col" *ngIf="doneTasks.length === 0">No tasks here</div>
             </div>
@@ -125,4 +92,22 @@
         </div>
     </main>
 </div>
+
+<ng-template #taskCard let-task let-done="done">
+    <div class="task-card" [class.done-card]="done" cdkDrag>
+        <div class="task-top">
+            <span class="task-title" [class.done-title]="done">{{ task.title }}</span>
+            <span class="priority-badge" [ngClass]="getPriorityClass(task.priority)">
+                {{ task.priority }}
+            </span>
+        </div>
+        <p class="task-desc" *ngIf="task.description">{{ task.description }}</p>
+        <p class="task-due" *ngIf="task.due_date">{{ task.due_date | date:'mediumDate' }}</p>
+        <div class="task-actions">
+            <button class="btn-edit" (click)="editTask(task.id)">Edit</button>
+            <button class="btn-delete" (click)="deleteTask(task.id)">Delete</button>
+        </div>
+    </div>
+</ng-template>
+
 
