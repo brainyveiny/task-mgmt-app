@@ -47,16 +47,13 @@ def get_current_user(
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
-    existing = db.query(User).filter(
-        (User.email == user_data.email) | (User.username == user_data.username)
-    ).first()
+    if db.query(User).filter(User.email == user_data.email).first():
+        logger.warning("Registration attempt with existing email.")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists.")
 
-    if existing:
-        logger.warning("Registration attempt with already existing username or email.")
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="User with this email or username already exists.",
-        )
+    if db.query(User).filter(User.username == user_data.username).first():
+        logger.warning("Registration attempt with existing username.")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already taken.")
 
     new_user = User(
         username=user_data.username,
@@ -75,12 +72,13 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
 def login(user_data: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == user_data.email).first()
 
-    if not user or not verify_password(user_data.password, user.hashed_password):
-        logger.warning("Failed login attempt.")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password.",
-        )
+    if not user:
+        logger.warning("Failed login attempt: user not found.")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password.")
+
+    if not verify_password(user_data.password, user.hashed_password):
+        logger.warning("Failed login attempt: wrong password.")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password.")
 
     token = create_token(data={"sub": str(user.id)})
     logger.info(f"User logged in: user_id={user.id}")

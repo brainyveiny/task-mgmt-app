@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr, field_validator
+import re
+from pydantic import BaseModel, field_validator
 from typing import Optional
 from datetime import datetime
 from models import TaskStatus, TaskPriority
@@ -6,8 +7,16 @@ from models import TaskStatus, TaskPriority
 
 class UserCreate(BaseModel):
     username: str
-    email: EmailStr
+    email: str
     password: str
+
+    @field_validator("email")
+    @classmethod
+    def email_must_be_valid(cls, v: str) -> str:
+        pattern = r'^[a-zA-Z0-9._%+-]+@(saksoft\.com|gmail\.com)$'
+        if not re.match(pattern, v):
+            raise ValueError("Invalid email")
+        return v
 
     @field_validator("username")
     @classmethod
@@ -26,7 +35,7 @@ class UserCreate(BaseModel):
 
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 

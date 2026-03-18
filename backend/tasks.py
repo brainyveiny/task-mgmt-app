@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from datetime import datetime, timezone
+from datetime import datetime
 from database import get_db
 from models import Task, TaskStatus, User
 from schemas import TaskCreate, TaskUpdate, TaskResponse
@@ -17,7 +17,7 @@ def create_task(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    if task_data.due_date and task_data.due_date < datetime.now(timezone.utc):
+    if task_data.due_date and task_data.due_date.replace(tzinfo=None) < datetime.utcnow():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="due_date cannot be in the past.")
 
     task = Task(**task_data.model_dump(), user_id=current_user.id)
@@ -69,7 +69,7 @@ def update_task(
     if not task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Task with id {task_id} not found.")
 
-    if task_data.due_date and task_data.due_date < datetime.now(timezone.utc):
+    if task_data.due_date and task_data.due_date.replace(tzinfo=None) < datetime.utcnow():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="due_date cannot be in the past.")
 
     update_fields = task_data.model_dump(exclude_unset=True)

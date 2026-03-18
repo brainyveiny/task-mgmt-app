@@ -15,7 +15,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(req).pipe(
         catchError((error) => {
-            if (error.status === 401) {
+            // Only redirect to login for 401s on protected routes, not on login/register itself
+            const isAuthEndpoint = req.url.includes('/auth/login') || req.url.includes('/auth/register');
+            if (error.status === 401 && !isAuthEndpoint) {
                 localStorage.removeItem('token');
                 router.navigate(['/login']);
             }

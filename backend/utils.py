@@ -6,6 +6,9 @@ from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -15,7 +18,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("task_mgmt_app")
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=6)
 
 
 def hash_password(password: str) -> str:
@@ -26,10 +29,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-if not SECRET_KEY:
-    raise ValueError("SECRET_KEY environment variable is not set. Please configure it before starting the application.")
-
+SECRET_KEY = os.getenv("SECRET_KEY", "changeme")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
@@ -46,6 +46,5 @@ def decode_token(token: str) -> Optional[dict]:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
-    except JWTError as e:
-        logger.warning(f"JWT decode failed: {e}")
+    except JWTError:
         return None

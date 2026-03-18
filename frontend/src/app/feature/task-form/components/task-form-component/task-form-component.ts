@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TaskService } from '../../service/task-service';
+import { AlertService } from '../../../../shared/alert.service';
 
 @Component({
     selector: 'app-task-form-component',
@@ -23,6 +24,7 @@ export class TaskFormComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private taskService: TaskService,
+        private alertService: AlertService,
         private route: ActivatedRoute,
         private router: Router
     ) {
@@ -80,7 +82,7 @@ export class TaskFormComponent implements OnInit {
 
         request$.subscribe({
             next: () => {
-                this.successMessage = this.isEditMode ? 'Task updated!' : 'Task created!';
+                this.alertService.show(this.isEditMode ? 'Task updated successfully' : 'Task created successfully');
                 this.loading = false;
                 this.router.navigate(['/dashboard']);
             },

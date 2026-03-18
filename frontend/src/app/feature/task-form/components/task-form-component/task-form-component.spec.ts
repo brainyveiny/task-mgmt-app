@@ -4,6 +4,7 @@ import { Router, ActivatedRoute, convertToParamMap } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { vi } from 'vitest';
 import { TaskFormComponent } from './task-form-component';
 import { Task } from '../../service/task-service';
 import { environment } from '../../../../environments/environment';
@@ -24,7 +25,6 @@ describe('TaskFormComponent', () => {
         due_date: '2026-04-01T00:00:00',
         created_at: '2026-03-01',
         updated_at: '2026-03-01',
-        user_id: 1,
     };
 
     function setupModule(routeId: string | null = null) {
@@ -66,7 +66,7 @@ describe('TaskFormComponent', () => {
         });
 
         it('should not be in edit mode', () => {
-            expect(component.isEditMode).toBeFalse();
+            expect(component.isEditMode).toBe(false);
         });
 
         it('should initialize form with default values', () => {
@@ -80,22 +80,22 @@ describe('TaskFormComponent', () => {
         describe('form validation', () => {
             it('should mark title as invalid when empty', () => {
                 component.taskForm.get('title')?.setValue('');
-                expect(component.taskForm.get('title')?.valid).toBeFalse();
+                expect(component.taskForm.get('title')?.valid).toBe(false);
             });
 
             it('should mark title as invalid when less than 3 characters', () => {
                 component.taskForm.get('title')?.setValue('ab');
-                expect(component.taskForm.get('title')?.valid).toBeFalse();
+                expect(component.taskForm.get('title')?.valid).toBe(false);
             });
 
             it('should mark title as valid with 3 or more characters', () => {
                 component.taskForm.get('title')?.setValue('abc');
-                expect(component.taskForm.get('title')?.valid).toBeTrue();
+                expect(component.taskForm.get('title')?.valid).toBe(true);
             });
 
             it('should allow empty description', () => {
                 component.taskForm.get('description')?.setValue('');
-                expect(component.taskForm.get('description')?.valid).toBeTrue();
+                expect(component.taskForm.get('description')?.valid).toBe(true);
             });
         });
 
@@ -122,7 +122,7 @@ describe('TaskFormComponent', () => {
             });
 
             it('should set success message on successful creation', fakeAsync(() => {
-                spyOn(router, 'navigate');
+                vi.spyOn(router, 'navigate');
                 component.taskForm.setValue({
                     title: 'New Task',
                     description: '',
@@ -136,7 +136,7 @@ describe('TaskFormComponent', () => {
                 req.flush(mockTask);
 
                 expect(component.successMessage).toBe('Task created!');
-                expect(component.loading).toBeFalse();
+                expect(component.loading).toBe(false);
             }));
 
             it('should set error message on creation failure', () => {
@@ -153,7 +153,7 @@ describe('TaskFormComponent', () => {
                 req.flush({ detail: 'Failed to create' }, { status: 400, statusText: 'Bad Request' });
 
                 expect(component.errorMessage).toBe('Failed to create');
-                expect(component.loading).toBeFalse();
+                expect(component.loading).toBe(false);
             });
         });
 
@@ -183,15 +183,15 @@ describe('TaskFormComponent', () => {
         });
 
         it('should be in edit mode when route has an id', () => {
-            const req = httpMock.expectOne(apiUrl);
-            req.flush([mockTask]);
-            expect(component.isEditMode).toBeTrue();
+            const req = httpMock.expectOne(`${apiUrl}/1`);
+            req.flush(mockTask);
+            expect(component.isEditMode).toBe(true);
             expect(component.taskId).toBe(1);
         });
 
         it('should load the task and patch the form', () => {
-            const req = httpMock.expectOne(apiUrl);
-            req.flush([mockTask]);
+            const req = httpMock.expectOne(`${apiUrl}/1`);
+            req.flush(mockTask);
 
             expect(component.taskForm.get('title')?.value).toBe('Existing Task');
             expect(component.taskForm.get('description')?.value).toBe('Some description');
@@ -201,8 +201,8 @@ describe('TaskFormComponent', () => {
         });
 
         it('should send a PUT request when updating a task', () => {
-            const req = httpMock.expectOne(apiUrl);
-            req.flush([mockTask]);
+            const req = httpMock.expectOne(`${apiUrl}/1`);
+            req.flush(mockTask);
 
             component.taskForm.get('title')?.setValue('Updated Title');
             component.onSubmit();
@@ -216,7 +216,7 @@ describe('TaskFormComponent', () => {
         });
 
         it('should set error message when loading task fails', () => {
-            const req = httpMock.expectOne(apiUrl);
+            const req = httpMock.expectOne(`${apiUrl}/1`);
             req.flush(null, { status: 500, statusText: 'Server Error' });
 
             expect(component.errorMessage).toBe('Failed to load task.');
