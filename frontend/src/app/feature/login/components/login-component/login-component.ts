@@ -1,9 +1,11 @@
+// Login component: shows a login form and navigates to dashboard on success
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../service/auth-service';
 
+// Only saksoft.com and gmail.com emails are allowed
 const emailPattern = /^[a-zA-Z0-9._%+-]+@(saksoft\.com|gmail\.com)$/;
 const passwordPattern = /^[a-zA-Z0-9_.]+$/;
 
@@ -25,13 +27,15 @@ export class LoginComponent {
     ) {
         this.loginForm = this.fb.group({
             email: ['', [Validators.required, Validators.pattern(emailPattern)]],
-            password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(72), Validators.pattern(passwordPattern)]],
+            password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72), Validators.pattern(passwordPattern)]],
         });
     }
 
+    // Getters for easy template access
     get email() { return this.loginForm.get('email')!; }
     get password() { return this.loginForm.get('password')!; }
 
+    // Called when the form is submitted
     onSubmit(): void {
         if (this.loginForm.invalid) return;
         this.loading = true;

@@ -1,3 +1,4 @@
+// Auth service: handles login, register, logout, and token storage
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -33,10 +34,12 @@ export class AuthService {
 
     constructor(private http: HttpClient) { }
 
+    // POST /auth/register
     register(data: RegisterRequest): Observable<User> {
         return this.http.post<User>(`${this.apiUrl}/register`, data);
     }
 
+    // POST /auth/login → saves token to localStorage
     login(data: LoginRequest): Observable<AuthResponse> {
         return this.http.post<AuthResponse>(`${this.apiUrl}/login`, data).pipe(
             tap((res) => {

@@ -1,3 +1,4 @@
+// Task form component: used for both creating and editing a task
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -17,7 +18,7 @@ export class TaskFormComponent implements OnInit {
     errorMessage = '';
     successMessage = '';
     loading = false;
-    minDate: string = new Date().toISOString().split('T')[0];
+    minDate: string = new Date().toISOString().split('T')[0]; // today's date for due_date min
 
     constructor(
         private fb: FormBuilder,
@@ -35,6 +36,7 @@ export class TaskFormComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        // If an id param is in the URL, we are in edit mode — load the task
         const id = this.route.snapshot.paramMap.get('id');
         if (id) {
             this.isEditMode = true;
@@ -57,16 +59,21 @@ export class TaskFormComponent implements OnInit {
 
     onSubmit(): void {
         if (this.taskForm.invalid) return;
+
         const title = this.taskForm.value.title?.trim();
         if (!title || title.length < 3) {
             this.errorMessage = 'Title must be at least 3 characters.';
             return;
         }
+
         this.loading = true;
         this.errorMessage = '';
         const formValue = { ...this.taskForm.value, title };
+
+        // Remove due_date if empty so the backend ignores it
         if (!formValue.due_date) delete formValue.due_date;
 
+        // Use create or update depending on the mode
         const request$ = this.isEditMode && this.taskId
             ? this.taskService.updateTask(this.taskId, formValue)
             : this.taskService.createTask(formValue);

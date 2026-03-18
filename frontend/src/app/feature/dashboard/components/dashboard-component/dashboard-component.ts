@@ -1,3 +1,4 @@
+// Dashboard component: loads tasks, supports search/filter, drag-drop, edit, delete
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -25,6 +26,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     errorMessage = '';
     loading = false;
 
+    // Used to debounce search input so we don't call API on every keypress
     private searchSubject = new Subject<string>();
     private searchSub?: Subscription;
 
@@ -36,6 +38,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.loadTasks();
+        // Wait 400ms after the user stops typing before fetching
         this.searchSub = this.searchSubject.pipe(debounceTime(400)).subscribe(() => this.loadTasks());
     }
 
@@ -43,6 +46,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.searchSub?.unsubscribe();
     }
 
+    // Fetch tasks from the API with current filters
     loadTasks(): void {
         this.loading = true;
         this.taskService.getTasks(
@@ -61,6 +65,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
     }
 
+    // Split flat task list into three status buckets for the kanban columns
     private splitTasks(): void {
         this.todoTasks = this.tasks.filter(t => t.status === 'TODO');
         this.inProgressTasks = this.tasks.filter(t => t.status === 'IN_PROGRESS');
@@ -70,6 +75,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     onSearch(): void { this.searchSubject.next(this.searchQuery); }
     onFilter(): void { this.loadTasks(); }
 
+    // Called when a task card is dropped into a column
     onDrop(event: CdkDragDrop<Task[]>, newStatus: TaskStatus): void {
         if (event.previousContainer === event.container) {
             moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
@@ -111,6 +117,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.router.navigate(['/login']);
     }
 
+    // Returns a CSS class based on task priority for color coding
     getPriorityClass(priority: string): string {
         return { LOW: 'priority-low', MEDIUM: 'priority-medium', HIGH: 'priority-high' }[priority] || '';
     }

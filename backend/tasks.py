@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from datetime import datetime, timezone
 from database import get_db
 from models import Task, TaskStatus, User
 from schemas import TaskCreate, TaskUpdate, TaskResponse
@@ -16,6 +17,9 @@ def create_task(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    if task_data.due_date and task_data.due_date < datetime.now(timezone.utc):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="due_date cannot be in the past.")
+
     task = Task(**task_data.model_dump(), user_id=current_user.id)
     db.add(task)
     db.commit()
@@ -26,15 +30,15 @@ def create_task(
 
 @router.get("", response_model=List[TaskResponse])
 def get_tasks(
-    status: Optional[TaskStatus] = Query(None, description="Filter by task status"),
+    task_status: Optional[TaskStatus] = Query(None, description="Filter by task status"),
     search: Optional[str] = Query(None, description="Search tasks by title"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     query = db.query(Task).filter(Task.user_id == current_user.id)
 
-    if status:
-        query = query.filter(Task.status == status)
+    if task_status:
+        query = query.filter(Task.status == task_status)
     if search:
         query = query.filter(Task.title.ilike(f"%{search}%"))
 
@@ -65,13 +69,16 @@ def update_task(
     if not task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Task with id {task_id} not found.")
 
+    if task_data.due_date and task_data.due_date < datetime.now(timezone.utc):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="due_date cannot be in the past.")
+
     update_fields = task_data.model_dump(exclude_unset=True)
     for key, value in update_fields.items():
         setattr(task, key, value)
 
     db.commit()
     db.refresh(task)
-    logger.info(f"Task updated: id={task_id}")
+    logger.info(f"Task updated: id={task_id}, user_id={current_user.id}")
     return task
 
 
@@ -87,4 +94,4 @@ def delete_task(
 
     db.delete(task)
     db.commit()
-    logger.info(f"Task deleted: id={task_id}")
+    logger.info(f"Task deleted: id={task_id}, user_id={current_user.id}")
