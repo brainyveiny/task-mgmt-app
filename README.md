@@ -6,6 +6,15 @@ A simple full-stack task management application.
 - **Frontend:** Angular, TypeScript
 - **Auth:** JWT (python-jose), bcrypt (passlib)
 
+## Features
+
+- User registration and login with JWT authentication
+- Create, update, delete tasks
+- Filter tasks by status
+- Search tasks by title
+- Drag and drop tasks between columns
+- Task priority and due date support
+
 ## Project Structure
 
 ```
@@ -76,7 +85,7 @@ Runs on http://localhost:4200
 | DELETE | /tasks/{id}       | Delete task       | Yes           |
 
 **Query params for GET /tasks:**
-- `?status=TODO` — filter by status (TODO, IN_PROGRESS, DONE)
+- `?task_status=TODO` — filter by status (TODO, IN_PROGRESS, DONE)
 - `?search=report` — search by title
 
 ## Environment Variables
@@ -113,3 +122,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES=60
 | created_at  | TIMESTAMP                     |
 | updated_at  | TIMESTAMP                     |
 | user_id     | INTEGER (FK → users.id)       |
+
+## Improvements Made
+
+- Added backend validation (password, username, title, due date)
+- Improved security by removing weak defaults and handling JWT errors
+- Added index on user_id for better performance
+- Cleaned and simplified frontend code with proper comments
