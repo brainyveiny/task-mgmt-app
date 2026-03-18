@@ -180,3 +180,61 @@ ACCESS_TOKEN_EXPIRE_MINUTES=60
 - CORS is restricted to `localhost:4200` only
 - Frontend uses `ChangeDetectorRef.detectChanges()` to force immediate error rendering
 - Search input is debounced 400ms before triggering API call
+
+---
+
+## Error Handling
+
+- Backend returns proper HTTP status codes (`400`, `401`, `404`, `409`)
+- Validation errors are handled using Pydantic schemas
+- JWT errors (expired/invalid tokens) are logged and return `401`
+- Frontend displays clear error messages using global alert system
+
+---
+
+## Logging
+
+- All API requests are logged with method, endpoint, status code, and response time
+- JWT decode failures and authentication issues are logged for debugging
+
+---
+
+## Angular Concepts Used
+
+- Components (Login, Register, Dashboard, Task Form)
+- Services (AuthService, TaskService)
+- HTTP Client for API integration
+- RxJS Observables and `subscribe`
+- Lifecycle Hooks (`ngOnInit`)
+- HTTP Interceptor for attaching JWT token
+- Route Guards for protected routes
+
+---
+
+## Backend Concepts Used
+
+- REST API design using FastAPI
+- Dependency Injection (`Depends`)
+- Exception handling with HTTP responses
+- Logging using Python logging
+- OOP using SQLAlchemy models
+- JWT-based authentication and authorization
+
+---
+
+## Database
+
+- PostgreSQL used as the primary database
+- SQLAlchemy ORM used for database operations
+- Demonstrates:
+  - Table creation
+  - Relationships (User → Tasks)
+  - CRUD operations
+
+---
+
+## Git & GitHub
+
+- Multiple commits with meaningful messages
+- Feature branch used for development (`refactor/backend-frontend-fixes`)
+- Final code merged into `main` branch
