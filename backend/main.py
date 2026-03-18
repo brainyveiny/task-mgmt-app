@@ -1,5 +1,10 @@
 import time
 import os
+from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,7 +13,16 @@ from utils import logger
 import auth
 import tasks
 
-app = FastAPI(title="Task Management API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Starting Task Management API...")
+    create_tables()
+    logger.info("Application ready.")
+    yield
+
+
+app = FastAPI(title="Task Management API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -33,13 +47,6 @@ async def log_requests(request: Request, call_next):
 
 app.include_router(auth.router)
 app.include_router(tasks.router)
-
-
-@app.on_event("startup")
-def on_startup():
-    logger.info("Starting Task Management API...")
-    create_tables()
-    logger.info("Application ready.")
 
 
 @app.get("/favicon.ico", include_in_schema=False)

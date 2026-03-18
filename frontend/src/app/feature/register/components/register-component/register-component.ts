@@ -1,9 +1,11 @@
+// Register component: shows a registration form and redirects to login on success
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../login/service/auth-service';
 
+// Only saksoft.com and gmail.com emails are allowed
 const emailPattern = /^[a-zA-Z0-9._%+-]+@(saksoft\.com|gmail\.com)$/;
 const passwordPattern = /^[a-zA-Z0-9_.]+$/;
 
@@ -27,14 +29,16 @@ export class RegisterComponent {
         this.registerForm = this.fb.group({
             username: ['', [Validators.required, Validators.minLength(3), Validators.pattern('^[a-zA-Z0-9_]+$')]],
             email: ['', [Validators.required, Validators.pattern(emailPattern)]],
-            password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(72), Validators.pattern(passwordPattern)]],
+            password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72), Validators.pattern(passwordPattern)]],
         });
     }
 
+    // Getters for easy template access
     get username() { return this.registerForm.get('username')!; }
     get email() { return this.registerForm.get('email')!; }
     get password() { return this.registerForm.get('password')!; }
 
+    // Called when the form is submitted
     onSubmit(): void {
         if (this.registerForm.invalid) return;
         this.loading = true;
@@ -49,7 +53,6 @@ export class RegisterComponent {
             error: (err) => {
                 this.errorMessage = err.error?.detail || 'Registration failed. Please try again.';
                 this.loading = false;
-                // setTimeout(() => this.errorMessage = '', 5000);
             },
         });
     }

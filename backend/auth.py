@@ -24,7 +24,15 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user_id = int(payload.get("sub"))
+    try:
+        user_id = int(payload.get("sub"))
+    except (TypeError, ValueError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
@@ -44,7 +52,7 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     ).first()
 
     if existing:
-        logger.warning(f"Duplicate registration attempt: {user_data.email}")
+        logger.warning("Registration attempt with already existing username or email.")
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="User with this email or username already exists.",
@@ -59,7 +67,7 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    logger.info(f"New user registered: {new_user.email}")
+    logger.info(f"New user registered: username={new_user.username}")
     return new_user
 
 
@@ -68,12 +76,12 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == user_data.email).first()
 
     if not user or not verify_password(user_data.password, user.hashed_password):
-        logger.warning(f"Failed login for: {user_data.email}")
+        logger.warning("Failed login attempt.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password.",
         )
 
     token = create_token(data={"sub": str(user.id)})
-    logger.info(f"User logged in: {user.email}")
+    logger.info(f"User logged in: user_id={user.id}")
     return Token(access_token=token)
