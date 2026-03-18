@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { vi } from 'vitest';
 import { RegisterComponent } from './register-component';
 import { environment } from '../../../../environments/environment';
 
@@ -40,9 +41,9 @@ describe('RegisterComponent', () => {
 
     describe('form initialization', () => {
         it('should create a form with username, email, and password fields', () => {
-            expect(component.registerForm.contains('username')).toBeTrue();
-            expect(component.registerForm.contains('email')).toBeTrue();
-            expect(component.registerForm.contains('password')).toBeTrue();
+            expect(component.registerForm.contains('username')).toBe(true);
+            expect(component.registerForm.contains('email')).toBe(true);
+            expect(component.registerForm.contains('password')).toBe(true);
         });
 
         it('should initialize with empty values', () => {
@@ -52,7 +53,7 @@ describe('RegisterComponent', () => {
         });
 
         it('should start with loading as false', () => {
-            expect(component.loading).toBeFalse();
+            expect(component.loading).toBe(false);
         });
 
         it('should start with empty error and success messages', () => {
@@ -64,56 +65,56 @@ describe('RegisterComponent', () => {
     describe('form validation', () => {
         it('should mark username as invalid when empty', () => {
             component.registerForm.get('username')?.setValue('');
-            expect(component.registerForm.get('username')?.valid).toBeFalse();
+            expect(component.registerForm.get('username')?.valid).toBe(false);
         });
 
         it('should mark username as invalid when less than 3 characters', () => {
             component.registerForm.get('username')?.setValue('ab');
-            expect(component.registerForm.get('username')?.valid).toBeFalse();
+            expect(component.registerForm.get('username')?.valid).toBe(false);
         });
 
         it('should mark username as invalid with special characters', () => {
             component.registerForm.get('username')?.setValue('user@name');
-            expect(component.registerForm.get('username')?.valid).toBeFalse();
+            expect(component.registerForm.get('username')?.valid).toBe(false);
         });
 
         it('should mark username as valid with alphanumeric and underscore', () => {
             component.registerForm.get('username')?.setValue('user_name123');
-            expect(component.registerForm.get('username')?.valid).toBeTrue();
+            expect(component.registerForm.get('username')?.valid).toBe(true);
         });
 
         it('should mark email as invalid for non-allowed domain', () => {
             component.registerForm.get('email')?.setValue('user@yahoo.com');
-            expect(component.registerForm.get('email')?.valid).toBeFalse();
+            expect(component.registerForm.get('email')?.valid).toBe(false);
         });
 
         it('should mark email as valid for @gmail.com', () => {
             component.registerForm.get('email')?.setValue('user@gmail.com');
-            expect(component.registerForm.get('email')?.valid).toBeTrue();
+            expect(component.registerForm.get('email')?.valid).toBe(true);
         });
 
         it('should mark email as valid for @saksoft.com', () => {
             component.registerForm.get('email')?.setValue('employee@saksoft.com');
-            expect(component.registerForm.get('email')?.valid).toBeTrue();
+            expect(component.registerForm.get('email')?.valid).toBe(true);
         });
 
-        it('should mark password as invalid when less than 6 characters', () => {
-            component.registerForm.get('password')?.setValue('12345');
-            expect(component.registerForm.get('password')?.valid).toBeFalse();
+        it('should mark password as invalid when less than 8 characters', () => {
+            component.registerForm.get('password')?.setValue('1234567');
+            expect(component.registerForm.get('password')?.valid).toBe(false);
         });
 
         it('should mark password as valid with allowed characters', () => {
-            component.registerForm.get('password')?.setValue('pass_1.a');
-            expect(component.registerForm.get('password')?.valid).toBeTrue();
+            component.registerForm.get('password')?.setValue('pass_1.ab');
+            expect(component.registerForm.get('password')?.valid).toBe(true);
         });
 
         it('should mark password as invalid with special characters', () => {
             component.registerForm.get('password')?.setValue('pass@123');
-            expect(component.registerForm.get('password')?.valid).toBeFalse();
+            expect(component.registerForm.get('password')?.valid).toBe(false);
         });
 
         it('should mark the entire form as invalid with empty fields', () => {
-            expect(component.registerForm.valid).toBeFalse();
+            expect(component.registerForm.valid).toBe(false);
         });
 
         it('should mark the entire form as valid with proper values', () => {
@@ -122,7 +123,7 @@ describe('RegisterComponent', () => {
                 email: 'user@gmail.com',
                 password: 'password123',
             });
-            expect(component.registerForm.valid).toBeTrue();
+            expect(component.registerForm.valid).toBe(true);
         });
     });
 
@@ -139,12 +140,12 @@ describe('RegisterComponent', () => {
                 password: 'password123',
             });
             component.onSubmit();
-            expect(component.loading).toBeTrue();
+            expect(component.loading).toBe(true);
             httpMock.expectOne(`${environment.apiUrl}/auth/register`).flush({});
         });
 
         it('should navigate to login on successful registration', () => {
-            spyOn(router, 'navigate');
+            vi.spyOn(router, 'navigate');
             component.registerForm.setValue({
                 username: 'testuser',
                 email: 'user@gmail.com',
@@ -157,7 +158,7 @@ describe('RegisterComponent', () => {
 
             expect(router.navigate).toHaveBeenCalledWith(['/login']);
             expect(component.successMessage).toBe('Account created!');
-            expect(component.loading).toBeFalse();
+            expect(component.loading).toBe(false);
         });
 
         it('should set error message on registration failure', () => {
@@ -172,13 +173,13 @@ describe('RegisterComponent', () => {
             req.flush({ detail: 'Email already registered' }, { status: 400, statusText: 'Bad Request' });
 
             expect(component.errorMessage).toBe('Email already registered');
-            expect(component.loading).toBeFalse();
+            expect(component.loading).toBe(false);
         });
 
         it('should show default error message when server error has no detail', () => {
             component.registerForm.setValue({
                 username: 'testuser',
-                email: 'test@example.com',
+                email: 'user@gmail.com',
                 password: 'password123',
             });
             component.onSubmit();
@@ -212,7 +213,7 @@ describe('RegisterComponent', () => {
         it('should disable submit button when form is invalid', () => {
             const compiled = fixture.nativeElement as HTMLElement;
             const button = compiled.querySelector('button[type="submit"]') as HTMLButtonElement;
-            expect(button.disabled).toBeTrue();
+            expect(button.disabled).toBe(true);
         });
 
         it('should have a link to login page', () => {

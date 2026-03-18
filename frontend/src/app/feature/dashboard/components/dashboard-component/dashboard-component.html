@@ -7,7 +7,9 @@
                 <span class="nav-icon">+</span> New Task
             </a>
         </nav>
-        <button class="btn-logout" (click)="logout()">Logout</button>
+        <button class="btn-logout" (click)="logout()">
+            <span class="material-icons">logout</span> Logout
+        </button>
     </aside>
 
     <main class="main-content">
@@ -33,7 +35,7 @@
         <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
         <div class="loading" *ngIf="loading">Loading tasks...</div>
 
-        <div class="kanban-board" *ngIf="!loading" [class.single-column]="selectedStatus !== ''">
+        <div class="kanban-board" [class.single-column]="selectedStatus !== ''">
 
             <!-- TO DO COLUMN -->
             <div class="kanban-column" *ngIf="selectedStatus === '' || selectedStatus === 'TODO'">

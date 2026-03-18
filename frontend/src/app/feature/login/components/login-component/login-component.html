@@ -18,8 +18,7 @@
           [class.invalid]="email.invalid && email.touched"
         />
         <span class="field-error" *ngIf="email.invalid && email.touched">
-          <span *ngIf="email.errors?.['required']">Email is required.</span>
-          <span *ngIf="email.errors?.['pattern']">Only @saksoft.com or @gmail.com allowed.</span>
+          Invalid email.
         </span>
       </div>
 
@@ -33,9 +32,7 @@
           [class.invalid]="password.invalid && password.touched"
         />
         <span class="field-error" *ngIf="password.invalid && password.touched">
-          <span *ngIf="password.errors?.['required']">Password is required.</span>
-          <span *ngIf="password.errors?.['minlength']">Password must be at least 8 characters.</span>
-          <span *ngIf="password.errors?.['pattern']">Only letters, numbers, underscore (_) and dot (.) allowed.</span>
+          Invalid password.
         </span>
       </div>
 

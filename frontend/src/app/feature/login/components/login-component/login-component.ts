@@ -1,13 +1,14 @@
 // Login component: shows a login form and navigates to dashboard on success
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../service/auth-service';
+import { AlertService } from '../../../../shared/alert.service';
 
 // Only saksoft.com and gmail.com emails are allowed
 const emailPattern = /^[a-zA-Z0-9._%+-]+@(saksoft\.com|gmail\.com)$/;
-const passwordPattern = /^[a-zA-Z0-9_.]+$/;
+const passwordPattern = /^[a-zA-Z0-9_.@]+$/;
 
 @Component({
     selector: 'app-login-component',
@@ -23,7 +24,9 @@ export class LoginComponent {
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,
-        private router: Router
+        private alertService: AlertService,
+        private router: Router,
+        private cdr: ChangeDetectorRef
     ) {
         this.loginForm = this.fb.group({
             email: ['', [Validators.required, Validators.pattern(emailPattern)]],
@@ -42,10 +45,14 @@ export class LoginComponent {
         this.errorMessage = '';
 
         this.authService.login(this.loginForm.value).subscribe({
-            next: () => this.router.navigate(['/dashboard']),
+            next: () => {
+                this.alertService.show('Logged in successfully');
+                this.router.navigate(['/dashboard']);
+            },
             error: (err) => {
                 this.errorMessage = err.error?.detail || 'Login failed. Please try again.';
                 this.loading = false;
+                this.cdr.detectChanges();
             },
         });
     }

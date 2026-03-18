@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { vi } from 'vitest';
 import { DashboardComponent } from './dashboard-component';
 import { Task } from '../../../task-form/service/task-service';
 import { environment } from '../../../../environments/environment';
@@ -16,9 +17,9 @@ describe('DashboardComponent', () => {
     const apiUrl = `${environment.apiUrl}/tasks`;
 
     const mockTasks: Task[] = [
-        { id: 1, title: 'Todo Task', description: 'Desc 1', status: 'TODO', priority: 'HIGH', created_at: '2026-03-01', updated_at: '2026-03-01', user_id: 1 },
-        { id: 2, title: 'Progress Task', description: 'Desc 2', status: 'IN_PROGRESS', priority: 'MEDIUM', created_at: '2026-03-01', updated_at: '2026-03-01', user_id: 1 },
-        { id: 3, title: 'Done Task', description: 'Desc 3', status: 'DONE', priority: 'LOW', created_at: '2026-03-01', updated_at: '2026-03-01', user_id: 1 },
+        { id: 1, title: 'Todo Task', description: 'Desc 1', status: 'TODO', priority: 'HIGH', created_at: '2026-03-01', updated_at: '2026-03-01' },
+        { id: 2, title: 'Progress Task', description: 'Desc 2', status: 'IN_PROGRESS', priority: 'MEDIUM', created_at: '2026-03-01', updated_at: '2026-03-01' },
+        { id: 3, title: 'Done Task', description: 'Desc 3', status: 'DONE', priority: 'LOW', created_at: '2026-03-01', updated_at: '2026-03-01' },
     ];
 
     beforeEach(async () => {
@@ -65,7 +66,7 @@ describe('DashboardComponent', () => {
 
         it('should set loading to false after tasks are loaded', () => {
             initComponent();
-            expect(component.loading).toBeFalse();
+            expect(component.loading).toBe(false);
         });
     });
 
@@ -104,7 +105,7 @@ describe('DashboardComponent', () => {
             component.selectedStatus = 'TODO';
             component.onFilter();
 
-            const req = httpMock.expectOne(`${apiUrl}?status=TODO`);
+            const req = httpMock.expectOne(`${apiUrl}?task_status=TODO`);
             req.flush([mockTasks[0]]);
             expect(component.tasks.length).toBe(1);
         });
@@ -113,7 +114,7 @@ describe('DashboardComponent', () => {
     describe('deleteTask', () => {
         it('should send delete request and reload tasks after confirmation', () => {
             initComponent();
-            spyOn(window, 'confirm').and.returnValue(true);
+            vi.spyOn(window, 'confirm').mockReturnValue(true);
             component.deleteTask(1);
 
             const deleteReq = httpMock.expectOne(`${apiUrl}/1`);
@@ -127,14 +128,14 @@ describe('DashboardComponent', () => {
 
         it('should not send delete request when user cancels', () => {
             initComponent();
-            spyOn(window, 'confirm').and.returnValue(false);
+            vi.spyOn(window, 'confirm').mockReturnValue(false);
             component.deleteTask(1);
             httpMock.expectNone(`${apiUrl}/1`);
         });
 
         it('should set error message on delete failure', () => {
             initComponent();
-            spyOn(window, 'confirm').and.returnValue(true);
+            vi.spyOn(window, 'confirm').mockReturnValue(true);
             component.deleteTask(1);
 
             const req = httpMock.expectOne(`${apiUrl}/1`);
@@ -146,7 +147,7 @@ describe('DashboardComponent', () => {
     describe('editTask', () => {
         it('should navigate to the edit route', () => {
             initComponent();
-            spyOn(router, 'navigate');
+            vi.spyOn(router, 'navigate');
             component.editTask(5);
             expect(router.navigate).toHaveBeenCalledWith(['/tasks', 5, 'edit']);
         });
@@ -155,7 +156,7 @@ describe('DashboardComponent', () => {
     describe('createTask', () => {
         it('should navigate to the new task route', () => {
             initComponent();
-            spyOn(router, 'navigate');
+            vi.spyOn(router, 'navigate');
             component.createTask();
             expect(router.navigate).toHaveBeenCalledWith(['/tasks/new']);
         });
@@ -164,7 +165,7 @@ describe('DashboardComponent', () => {
     describe('logout', () => {
         it('should clear token and navigate to login', () => {
             initComponent();
-            spyOn(router, 'navigate');
+            vi.spyOn(router, 'navigate');
             component.logout();
             expect(localStorage.getItem('token')).toBeNull();
             expect(router.navigate).toHaveBeenCalledWith(['/login']);
@@ -200,7 +201,7 @@ describe('DashboardComponent', () => {
             req.flush(null, { status: 500, statusText: 'Server Error' });
 
             expect(component.errorMessage).toBe('Failed to load tasks.');
-            expect(component.loading).toBeFalse();
+            expect(component.loading).toBe(false);
         });
     });
 

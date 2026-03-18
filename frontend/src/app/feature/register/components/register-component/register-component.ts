@@ -1,13 +1,14 @@
 // Register component: shows a registration form and redirects to login on success
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../login/service/auth-service';
+import { AlertService } from '../../../../shared/alert.service';
 
 // Only saksoft.com and gmail.com emails are allowed
 const emailPattern = /^[a-zA-Z0-9._%+-]+@(saksoft\.com|gmail\.com)$/;
-const passwordPattern = /^[a-zA-Z0-9_.]+$/;
+const passwordPattern = /^[a-zA-Z0-9_.@]+$/;
 
 @Component({
     selector: 'app-register-component',
@@ -24,7 +25,9 @@ export class RegisterComponent {
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,
-        private router: Router
+        private alertService: AlertService,
+        private router: Router,
+        private cdr: ChangeDetectorRef
     ) {
         this.registerForm = this.fb.group({
             username: ['', [Validators.required, Validators.minLength(3), Validators.pattern('^[a-zA-Z0-9_]+$')]],
@@ -46,13 +49,14 @@ export class RegisterComponent {
 
         this.authService.register(this.registerForm.value).subscribe({
             next: () => {
-                this.successMessage = 'Account created!';
                 this.loading = false;
+                this.alertService.show('Account created successfully');
                 this.router.navigate(['/login']);
             },
             error: (err) => {
                 this.errorMessage = err.error?.detail || 'Registration failed. Please try again.';
                 this.loading = false;
+                this.cdr.detectChanges();
             },
         });
     }

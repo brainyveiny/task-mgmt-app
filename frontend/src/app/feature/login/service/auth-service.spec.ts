@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { vi } from 'vitest';
 import { AuthService, AuthResponse, User } from './auth-service';
 import { environment } from '../../../../environments/environment';
 
@@ -95,11 +96,11 @@ describe('AuthService', () => {
     describe('isLoggedIn', () => {
         it('should return true when a token exists', () => {
             localStorage.setItem('token', 'some-token');
-            expect(service.isLoggedIn()).toBeTrue();
+            expect(service.isLoggedIn()).toBe(true);
         });
 
         it('should return false when no token exists', () => {
-            expect(service.isLoggedIn()).toBeFalse();
+            expect(service.isLoggedIn()).toBe(false);
         });
     });
 });
