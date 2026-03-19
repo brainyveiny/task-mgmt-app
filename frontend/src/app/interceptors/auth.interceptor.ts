@@ -1,9 +1,18 @@
-// Auth Interceptor: automatically adds JWT token to HTTP request headers
+// Global HTTP interceptor to inject JWT tokens into all outgoing requests
+//#region Imports
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
-
+//#endregion
+ 
+//#region Interceptor
+/**
+ * Intercepts HTTP requests to add Authorization header
+ * @param req  - The outgoing request
+ * @param next - The next interceptor in the chain
+ * @returns Observable of the HTTP event stream
+ */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const router = inject(Router);
     const token = localStorage.getItem('token');
@@ -26,3 +35,4 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         })
     );
 };
+//#endregion

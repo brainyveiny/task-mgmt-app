@@ -1,7 +1,12 @@
+/**
+ * @summary UI component for displaying transient global alert messages
+ * Subscribes to AlertService to show/hide toast notifications
+ */
+//#region Imports
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-// Alert Component: UI for showing a temporary toast message to the user
 import { CommonModule } from '@angular/common';
 import { AlertService } from './alert.service';
+//#endregion
 
 // Global alert box: displayed at center-top, disappears after 3 seconds
 @Component({
@@ -28,9 +33,15 @@ import { AlertService } from './alert.service';
     `]
 })
 export class AlertComponent implements OnInit {
+    //#region Properties
     message = '';
+    //#endregion
 
-    constructor(private alertService: AlertService, private cdr: ChangeDetectorRef) { }
+    //#region Methods
+    constructor(
+        private alertService: AlertService,
+        private cdr: ChangeDetectorRef
+    ) { }
 
     ngOnInit(): void {
         this.alertService.message$.subscribe(msg => {
@@ -38,4 +49,5 @@ export class AlertComponent implements OnInit {
             this.cdr.markForCheck();
         });
     }
+    //#endregion
 }

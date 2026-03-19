@@ -1,4 +1,4 @@
-// Unit tests for the Task Service
+// Unit tests for the task service managing task-related API operations
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';

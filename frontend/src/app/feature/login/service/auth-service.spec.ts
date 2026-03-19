@@ -1,4 +1,4 @@
-// Unit tests for Authentication Service
+// Unit tests for the authentication service managing token storage and API communication
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';

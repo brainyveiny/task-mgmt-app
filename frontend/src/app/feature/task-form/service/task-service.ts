@@ -1,8 +1,12 @@
-// Task Service: handles all CRUD API calls for managing tasks
+// Provider for task-related data operations and API interactions
+//#region Imports
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+//#endregion
+ 
+//#region Types & Interfaces
 
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
@@ -33,7 +37,9 @@ export interface TaskUpdate {
     priority?: TaskPriority;
     due_date?: string;
 }
-
+//#endregion
+ 
+//#region Service
 @Injectable({ providedIn: 'root' })
 export class TaskService {
     private readonly apiUrl = `${environment.apiUrl}/tasks`;
@@ -41,6 +47,12 @@ export class TaskService {
     constructor(private http: HttpClient) { }
 
     // GET /tasks — optional filters: task_status and search
+    /**
+     * Retrieves tasks with optional search and status filters
+     * @param status - Filter by task status
+     * @param search - Filter by search query
+     * @returns Observable of Task array
+     */
     getTasks(status?: TaskStatus, search?: string): Observable<Task[]> {
         let params = new HttpParams();
         if (status) params = params.set('task_status', status);
@@ -68,3 +80,4 @@ export class TaskService {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
 }
+//#endregion

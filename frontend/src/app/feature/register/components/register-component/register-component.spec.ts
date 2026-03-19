@@ -1,4 +1,4 @@
-// Unit tests for the Register component
+// Unit tests for the registration component verifying user creation and redirection
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';

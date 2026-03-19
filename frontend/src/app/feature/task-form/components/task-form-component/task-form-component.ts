@@ -1,11 +1,16 @@
-// Task Form Component: logic for creating new tasks or editing existing ones
+/**
+ * @summary Unified form for creating and updating tasks
+ * Handles route parameter extraction for edit mode and manages form state
+ */
+//#region Imports
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TaskService } from '../../service/task-service';
 import { AlertService } from '../../../../shared/alert.service';
-
+//#endregion
+ 
 @Component({
     selector: 'app-task-form-component',
     standalone: true,
@@ -13,6 +18,7 @@ import { AlertService } from '../../../../shared/alert.service';
     templateUrl: './task-form-component.html',
 })
 export class TaskFormComponent implements OnInit {
+    //#region Properties
     taskForm: FormGroup;
     isEditMode = false;
     taskId?: number;
@@ -20,7 +26,9 @@ export class TaskFormComponent implements OnInit {
     successMessage = '';
     loading = false;
     minDate: string = new Date().toISOString().split('T')[0]; // today's date for due_date min
-
+    //#endregion
+ 
+    //#region Methods
     constructor(
         private fb: FormBuilder,
         private taskService: TaskService,
@@ -58,8 +66,11 @@ export class TaskFormComponent implements OnInit {
     }
 
     get title() { return this.taskForm.get('title')!; }
-
-    // Save the task data (either create new or update existing)
+ 
+    /**
+     * Persists task data to the server
+     * @returns void
+     */
   onSubmit(): void {
         if (this.taskForm.invalid) return;
 

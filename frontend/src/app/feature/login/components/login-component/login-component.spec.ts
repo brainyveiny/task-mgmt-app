@@ -1,4 +1,4 @@
-// Unit tests for the Login component
+// Unit tests for the login component covering form validation and auth service integration
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';

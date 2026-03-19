@@ -1,4 +1,8 @@
-// Dashboard Component: displays all user tasks and provides filtering/search options
+/**
+ * @summary Central task management dashboard with Kanban-style visualization
+ * Orchestrates task loading, filtering, search, and drag-and-drop status updates
+ */
+//#region Imports
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +14,8 @@ import { AlertService } from '../../../../shared/alert.service';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-
+//#endregion
+ 
 @Component({
     selector: 'app-dashboard-component',
     standalone: true,
@@ -18,6 +23,7 @@ import { debounceTime } from 'rxjs/operators';
     templateUrl: './dashboard-component.html',
 })
 export class DashboardComponent implements OnInit, OnDestroy {
+    //#region Properties
     tasks: Task[] = [];
     todoTasks: Task[] = [];
     inProgressTasks: Task[] = [];
@@ -26,11 +32,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     selectedStatus: TaskStatus | '' = '';
     errorMessage = '';
     loading = false;
-
+ 
     // Used to debounce search input so we don't call API on every keypress
     private searchSubject = new Subject<string>();
     private searchSub?: Subscription;
-
+    //#endregion
+ 
+    //#region Methods
     constructor(
         private taskService: TaskService,
         private authService: AuthService,
@@ -56,6 +64,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     // Fetch tasks from the API with current filters
+    /**
+     * Loads tasks from TaskService based on current search and status filters
+     * @returns void
+     */
     // Load all tasks from the server with optional filters
   loadTasks(): void {
         this.loading = true;
@@ -106,6 +118,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
     }
 
+    /**
+     * Prompts for confirmation and deletes the specified task
+     * @param id - The numeric ID of the task to delete
+     * @returns void
+     */
     // Remove a task after user confirms the action
   deleteTask(id: number): void {
         if (!confirm('Delete this task?')) return;
@@ -133,9 +150,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.alertService.show('Logged out successfully');
         this.router.navigate(['/login']);
     }
-
+ 
+    /**
+     * Maps task priority to corresponding CSS class
+     * @param priority - TaskPriority value
+     * @returns string - CSS class name
+     */
     // Returns a CSS class based on task priority for color coding
     getPriorityClass(priority: string): string {
         return { LOW: 'priority-low', MEDIUM: 'priority-medium', HIGH: 'priority-high' }[priority] || '';
     }
+    //#endregion
 }

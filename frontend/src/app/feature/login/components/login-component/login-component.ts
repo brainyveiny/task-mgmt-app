@@ -1,10 +1,15 @@
-// Login Component: manages user sign-in and handles authentication errors
+/**
+ * @summary Handles user authentication and session initiation
+ * Displays login form, validates credentials via AuthService, and manages navigation
+ */
+//#region Imports
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../service/auth-service';
 import { AlertService } from '../../../../shared/alert.service';
+//#endregion
 
 // Only saksoft.com and gmail.com emails are allowed
 const emailPattern = /^[a-zA-Z0-9._%+-]+@(saksoft\.com|gmail\.com)$/;
@@ -17,10 +22,13 @@ const passwordPattern = /^[a-zA-Z0-9_.@]+$/;
     templateUrl: './login-component.html',
 })
 export class LoginComponent {
+    //#region Properties
     loginForm: FormGroup;
-    errorMessage = '';
     loading = false;
+    errorMessage = '';
+    //#endregion
 
+    //#region Methods
     constructor(
         private fb: FormBuilder,
         private authService: AuthService,
@@ -39,6 +47,10 @@ export class LoginComponent {
     get password() { return this.loginForm.get('password')!; }
 
     // Called when the form is submitted
+    /**
+     * Attempts to authenticate the user with current form values
+     * @returns void
+     */
     // Validate form and send login request to the server
   onSubmit(): void {
         if (this.loginForm.invalid) return;
@@ -57,4 +69,5 @@ export class LoginComponent {
             },
         });
     }
+    //#endregion
 }

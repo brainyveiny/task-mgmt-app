@@ -1,4 +1,4 @@
-// Unit tests for the Dashboard component
+// Unit tests for the main task dashboard including filtering and deletion flows
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
