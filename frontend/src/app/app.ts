@@ -1,3 +1,4 @@
+// Main App component: serves as the root component with global alert and router outlet
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AlertComponent } from './shared/alert.component';

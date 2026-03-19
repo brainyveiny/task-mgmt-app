@@ -1,4 +1,4 @@
-// Task form component: used for both creating and editing a task
+// Task Form Component: logic for creating new tasks or editing existing ones
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -59,7 +59,8 @@ export class TaskFormComponent implements OnInit {
 
     get title() { return this.taskForm.get('title')!; }
 
-    onSubmit(): void {
+    // Save the task data (either create new or update existing)
+  onSubmit(): void {
         if (this.taskForm.invalid) return;
 
         const title = this.taskForm.value.title?.trim();

@@ -1,3 +1,4 @@
+// Auth Interceptor: automatically adds JWT token to HTTP request headers
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';

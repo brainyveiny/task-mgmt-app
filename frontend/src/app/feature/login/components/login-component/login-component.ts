@@ -1,4 +1,4 @@
-// Login component: shows a login form and navigates to dashboard on success
+// Login Component: manages user sign-in and handles authentication errors
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -39,7 +39,8 @@ export class LoginComponent {
     get password() { return this.loginForm.get('password')!; }
 
     // Called when the form is submitted
-    onSubmit(): void {
+    // Validate form and send login request to the server
+  onSubmit(): void {
         if (this.loginForm.invalid) return;
         this.loading = true;
         this.errorMessage = '';

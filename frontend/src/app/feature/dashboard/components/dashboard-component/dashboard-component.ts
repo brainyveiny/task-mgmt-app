@@ -1,4 +1,4 @@
-// Dashboard component: loads tasks, supports search/filter, drag-drop, edit, delete
+// Dashboard Component: displays all user tasks and provides filtering/search options
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -56,7 +56,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     // Fetch tasks from the API with current filters
-    loadTasks(): void {
+    // Load all tasks from the server with optional filters
+  loadTasks(): void {
         this.loading = true;
         this.taskService.getTasks(
             this.selectedStatus || undefined,
@@ -105,7 +106,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
     }
 
-    deleteTask(id: number): void {
+    // Remove a task after user confirms the action
+  deleteTask(id: number): void {
         if (!confirm('Delete this task?')) return;
         this.taskService.deleteTask(id).subscribe({
             next: () => {

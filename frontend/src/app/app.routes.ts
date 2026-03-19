@@ -1,3 +1,4 @@
+// Application Routes: defines all pages and the auth guard logic
 import { inject } from '@angular/core';
 import { Routes, Router } from '@angular/router';
 import { AuthService } from './feature/login/service/auth-service';
@@ -6,6 +7,7 @@ import { RegisterComponent } from './feature/register/components/register-compon
 import { DashboardComponent } from './feature/dashboard/components/dashboard-component/dashboard-component';
 import { TaskFormComponent } from './feature/task-form/components/task-form-component/task-form-component';
 
+// Access guard to prevent unauthenticated users from seeing protected pages
 const authGuard = () => {
     const auth = inject(AuthService);
     const router = inject(Router);
@@ -16,6 +18,7 @@ const authGuard = () => {
     return false;
 };
 
+// List of all paths in the app
 export const routes: Routes = [
     { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
     { path: 'login', component: LoginComponent },

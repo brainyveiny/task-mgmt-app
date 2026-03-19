@@ -1,3 +1,4 @@
+// Unit tests for the Dashboard component
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';

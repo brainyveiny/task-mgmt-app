@@ -1,3 +1,4 @@
+// Application Configuration: sets up routing and common providers like HTTP client with interceptors
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';

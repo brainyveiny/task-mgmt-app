@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+// Alert Component: UI for showing a temporary toast message to the user
 import { CommonModule } from '@angular/common';
 import { AlertService } from './alert.service';
 

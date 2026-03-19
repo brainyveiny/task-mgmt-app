@@ -1,4 +1,4 @@
-// Register component: shows a registration form and redirects to login on success
+// Register Component: handles new user account creation logic
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -42,7 +42,8 @@ export class RegisterComponent {
     get password() { return this.registerForm.get('password')!; }
 
     // Called when the form is submitted
-    onSubmit(): void {
+    // Validate form and create a new user account
+  onSubmit(): void {
         if (this.registerForm.invalid) return;
         this.loading = true;
         this.errorMessage = '';

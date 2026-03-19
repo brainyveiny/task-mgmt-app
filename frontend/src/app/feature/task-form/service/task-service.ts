@@ -1,4 +1,4 @@
-// Task service: handles all CRUD API calls for tasks
+// Task Service: handles all CRUD API calls for managing tasks
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
