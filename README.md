@@ -1,78 +1,195 @@
 # Task Management App
 
-A full-stack task management application built with FastAPI and Angular.
+A full-stack task management application built with **FastAPI** (backend) and **Angular** (frontend). Users can register, log in, and manage their personal tasks on a Kanban-style board.
 
-**Stack:**
-- Backend: Python, FastAPI, SQLAlchemy, PostgreSQL, JWT
-- Frontend: Angular 19 (standalone components), TypeScript, RxJS, Angular CDK (drag-drop)
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | FastAPI, SQLAlchemy, PostgreSQL, Pydantic, python-jose, Passlib (bcrypt) |
+| Frontend | Angular 19, Angular CDK, RxJS, Angular Reactive Forms |
+| Auth | JWT (HS256), bcrypt password hashing |
+| Dev Tools | Uvicorn, Angular CLI, python-dotenv |
 
 ---
 
 ## Features
 
-- User registration and login with JWT authentication
-- Create, edit, delete tasks (title, description, status, priority, due date)
-- Kanban board grouped by status: To Do / In Progress / Done
-- Drag and drop tasks between columns
-- Filter tasks by status
-- Search tasks by title (debounced)
-- Route-level auth guard — protected pages redirect to login
-- JWT attached to all API requests via HTTP interceptor
-- Global alert toasts for every user action (3s auto-dismiss)
+- User registration and login with JWT-based authentication
+- Create, view, edit, and delete personal tasks
+- Kanban board with drag-and-drop to change task status
+- Filter tasks by status (To Do / In Progress / Done)
+- Search tasks by title (debounced, case-insensitive)
+- Priority levels: Low, Medium, High
+- Due date with past-date validation
+- Global alert notifications (auto-dismiss after 3 seconds)
+- Request logging with duration tracking on the backend
 
 ---
 
-## Project Structure
+## Architecture Overview
+
+```
+Angular (localhost:4200)  ←→  FastAPI (localhost:8000)  ←→  PostgreSQL
+```
+
+**Auth Flow:**
+1. User logs in → FastAPI verifies password → returns JWT
+2. Angular stores token in `localStorage`
+3. Every HTTP request → `authInterceptor` injects `Authorization: Bearer <token>` header
+4. FastAPI's `get_current_user` dependency decodes token and authorizes the request
+5. On 401 (non-auth routes) → interceptor clears token → redirects to `/login`
+
+---
+
+## Backend Structure
 
 ```
 backend/
-├── main.py          # FastAPI app, CORS, request logging middleware
-├── database.py      # SQLAlchemy engine, session, table creation
-├── models.py        # User and Task models with enums
-├── schemas.py       # Pydantic schemas with field validators
-├── auth.py          # /auth/register, /auth/login, get_current_user
-├── tasks.py         # Task CRUD endpoints
-├── utils.py         # bcrypt hashing, JWT encode/decode, logger
-├── requirements.txt
-└── .env
-
-frontend/src/app/
-├── feature/
-│   ├── login/           # Login form + AuthService (stores JWT in localStorage)
-│   ├── register/        # Register form
-│   ├── dashboard/       # Kanban board, drag-drop, filter, search
-│   └── task-form/       # Create / edit task form + TaskService
-├── shared/
-│   ├── alert.service.ts  # Global BehaviorSubject-based alert (NgZone + 3s timeout)
-│   └── alert.component.ts
-├── interceptors/
-│   └── auth.interceptor.ts  # Adds Bearer token, handles 401 (skips auth endpoints)
-├── app.routes.ts        # Routes with inline authGuard (checks localStorage token)
-├── app.config.ts        # provideHttpClient with interceptor
-└── app.ts               # Root component, includes <app-alert>
+├── main.py        # App entry point, CORS config, router registration, request logging
+├── database.py    # SQLAlchemy engine, session factory, get_db dependency
+├── models.py      # ORM models: User, Task (with Enums for status and priority)
+├── schemas.py     # Pydantic schemas for validation and response serialization
+├── auth.py        # /auth/register and /auth/login endpoints, get_current_user dependency
+├── tasks.py       # CRUD endpoints for tasks (/tasks)
+├── utils.py       # bcrypt helpers, JWT create/decode, centralized logger
+└── .env           # Environment config (DATABASE_URL, SECRET_KEY, token expiry)
 ```
 
 ---
 
-## Setup
+## Frontend Structure
+
+```
+frontend/src/app/
+├── feature/
+│   ├── login/
+│   │   ├── components/login-component/   # Login form (email + password)
+│   │   └── service/auth-service.ts       # login(), register(), logout(), isLoggedIn()
+│   ├── register/
+│   │   └── components/register-component/ # Registration form
+│   ├── dashboard/
+│   │   └── components/dashboard-component/ # Kanban board, search, filter, drag-drop
+│   └── task-form/
+│       ├── components/task-form-component/ # Unified create/edit form
+│       └── service/task-service.ts        # getTasks(), createTask(), updateTask(), deleteTask()
+├── interceptors/
+│   └── auth.interceptor.ts   # Attaches Bearer token; handles 401 redirect
+└── shared/
+    ├── alert.service.ts       # BehaviorSubject-based global alert (3s auto-dismiss)
+    └── alert.component.ts     # Displays alert messages
+```
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Auth Required | Description |
+|--------|----------|:---:|---|
+| `POST` | `/auth/register` | No | Register new user |
+| `POST` | `/auth/login` | No | Login and receive JWT |
+| `GET` | `/tasks` | Yes | Get all tasks (supports `task_status`, `search` query params) |
+| `GET` | `/tasks/{id}` | Yes | Get task by ID |
+| `POST` | `/tasks` | Yes | Create a new task |
+| `PUT` | `/tasks/{id}` | Yes | Update task (partial update supported) |
+| `DELETE` | `/tasks/{id}` | Yes | Delete task (returns 204) |
+
+---
+
+## Validation Rules
+
+| Field | Rule |
+|---|---|
+| `username` | Min 3 characters, alphanumeric + underscore only |
+| `email` | Must match `@saksoft.com` or `@gmail.com` |
+| `password` | Min 8, max 72 characters, alphanumeric + `_.@` |
+| `task title` | Required, must not be blank or whitespace |
+| `due_date` | Cannot be in the past (validated on backend) |
+| `status` | Enum: `TODO`, `IN_PROGRESS`, `DONE` |
+| `priority` | Enum: `LOW`, `MEDIUM`, `HIGH` |
+
+---
+
+## Database Schema
+
+**Users**
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | Integer PK | Auto-increment |
+| `username` | String(50) | Unique, indexed |
+| `email` | String(100) | Unique, indexed |
+| `hashed_password` | String(255) | bcrypt hash |
+| `created_at` | DateTime | Auto-set by server |
+
+**Tasks**
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | Integer PK | Auto-increment |
+| `title` | String(200) | Required |
+| `description` | Text | Nullable |
+| `status` | Enum | `TODO` / `IN_PROGRESS` / `DONE` |
+| `priority` | Enum | `LOW` / `MEDIUM` / `HIGH` |
+| `due_date` | DateTime | Nullable, timezone-aware |
+| `user_id` | FK → users.id | Cascade delete |
+| `created_at` | DateTime | Server-set |
+| `updated_at` | DateTime | Auto-updated on change |
+
+**Relationship:** One User → Many Tasks. Deleting a user cascades and deletes all their tasks.
+
+---
+
+## Key Implementation Details
+
+- **Logging**: Every HTTP request is logged with method, path, status code, and response time in ms
+- **Auth dependency**: `get_current_user` is a reusable FastAPI `Depends()` used on all task routes
+- **Partial update**: `PUT /tasks/{id}` uses `model_dump(exclude_unset=True)` so only sent fields are updated
+- **Drag-and-drop**: Dropping a card to a new column calls `PUT /tasks/{id}` with the updated status only
+- **Search debounce**: Search input fires API only after 400ms of no typing (RxJS `debounceTime`)
+- **Task isolation**: All task queries filter by `Task.user_id == current_user.id` — users only see their own tasks
+- **bcrypt rounds**: Set to `6` (down from default `12`) for faster login without sacrificing security meaningfully
+
+---
+
+## Error Handling
+
+| Status Code | Scenario |
+|---|---|
+| `201 Created` | Successful register or task creation |
+| `204 No Content` | Successful task deletion |
+| `400 Bad Request` | due_date is in the past |
+| `401 Unauthorized` | Invalid/expired/missing JWT |
+| `409 Conflict` | Email or username already exists |
+| `422 Unprocessable Entity` | Pydantic validation failure |
+| `404 Not Found` | Task ID does not exist or belongs to another user |
+
+- Frontend 401 errors on protected routes → interceptor auto-redirects to `/login`
+- Auth endpoint 401 errors → passed through to display "Invalid email or password"
+- All errors show inline message in components via `err.error?.detail`
+
+---
+
+## How to Run
 
 ### Prerequisites
-
 - Python 3.10+
 - Node.js 18+
-- PostgreSQL — create a database named `task_mgmt_db`
+- PostgreSQL (running locally)
 
 ### Backend
 
 ```bash
 cd backend
-python -m venv venv
-venv\Scripts\activate        # Windows
+.\venv\Scripts\activate       # Windows
 pip install -r requirements.txt
-python -m uvicorn main:app --reload
+# Update .env with your DATABASE_URL
+uvicorn main:app --reload
 ```
 
-Runs on: `http://localhost:8000`  
+API will be available at: `http://localhost:8000`  
 Swagger docs: `http://localhost:8000/docs`
 
 ### Frontend
@@ -80,161 +197,14 @@ Swagger docs: `http://localhost:8000/docs`
 ```bash
 cd frontend
 npm install
-ng serve
+npm start
 ```
 
-Runs on: `http://localhost:4200`
+App will be available at: `http://localhost:4200`
 
 ---
 
-## Environment Variables
+## Git Workflow
 
-Create `backend/.env`:
-
-```
-DATABASE_URL=postgresql://postgres:your_password@localhost:5432/task_mgmt_db
-SECRET_KEY=your-secret-key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=60
-```
-
----
-
-## API Endpoints
-
-| Method | Endpoint       | Description        | Auth |
-|--------|----------------|--------------------|------|
-| POST   | /auth/register | Register user      | No   |
-| POST   | /auth/login    | Login → JWT token  | No   |
-| GET    | /tasks         | List user tasks    | Yes  |
-| GET    | /tasks/{id}    | Get task by ID     | Yes  |
-| POST   | /tasks         | Create task        | Yes  |
-| PUT    | /tasks/{id}    | Update task        | Yes  |
-| DELETE | /tasks/{id}    | Delete task        | Yes  |
-
-**GET /tasks query params:**
-- `?task_status=TODO` — filter by `TODO`, `IN_PROGRESS`, or `DONE`
-- `?search=keyword` — case-insensitive title search
-
----
-
-## Validation
-
-### Registration (`/auth/register`)
-- `username` — min 3 chars, alphanumeric + underscore only
-- `email` — must end with `@saksoft.com` or `@gmail.com`
-- `password` — min 8, max 72 chars; letters, digits, `_`, `.`, `@`
-- Duplicate email → `409 Email already exists.`
-- Duplicate username → `409 Username already taken.`
-
-### Tasks
-- `title` — required, min 3, max 200 chars
-- `due_date` — optional; rejected if in the past
-
----
-
-## Authentication Flow
-
-1. User registers → password hashed with bcrypt (rounds=6)
-2. User logs in → JWT token returned and saved in `localStorage`
-3. All task requests include `Authorization: Bearer <token>` (via interceptor)
-4. Backend decodes JWT, looks up user, rejects expired/invalid tokens with `401`
-5. Frontend interceptor catches `401` on protected routes → clears token → redirects to login
-6. Auth endpoints (`/auth/login`, `/auth/register`) are excluded from the redirect on `401`
-
----
-
-## Database Schema
-
-### users
-| Column          | Type                      |
-|-----------------|---------------------------|
-| id              | INTEGER (PK, indexed)     |
-| username        | VARCHAR(50), unique       |
-| email           | VARCHAR(100), unique      |
-| hashed_password | VARCHAR(255)              |
-| created_at      | TIMESTAMP WITH TIMEZONE   |
-
-### tasks
-| Column      | Type                            |
-|-------------|---------------------------------|
-| id          | INTEGER (PK, indexed)           |
-| title       | VARCHAR(200)                    |
-| description | TEXT (nullable)                 |
-| status      | ENUM (TODO, IN_PROGRESS, DONE)  |
-| priority    | ENUM (LOW, MEDIUM, HIGH)        |
-| due_date    | TIMESTAMP WITH TIMEZONE (nullable) |
-| created_at  | TIMESTAMP WITH TIMEZONE         |
-| updated_at  | TIMESTAMP WITH TIMEZONE         |
-| user_id     | INTEGER (FK → users.id, CASCADE DELETE, indexed) |
-
-**Relationship:** One user → many tasks (cascade delete on user removal)
-
----
-
-## Key Implementation Details
-
-- All requests are logged with method, path, status code, and duration (ms)
-- Tasks are scoped per user — users only see and modify their own tasks
-- `updated_at` is auto-updated by the database on every row change
-- CORS is restricted to `localhost:4200` only
-- Frontend uses `ChangeDetectorRef.detectChanges()` to force immediate error rendering
-- Search input is debounced 400ms before triggering API call
-
----
-
-## Error Handling
-
-- Backend returns proper HTTP status codes (`400`, `401`, `404`, `409`)
-- Validation errors are handled using Pydantic schemas
-- JWT errors (expired/invalid tokens) are logged and return `401`
-- Frontend displays clear error messages using global alert system
-
----
-
-## Logging
-
-- All API requests are logged with method, endpoint, status code, and response time
-- JWT decode failures and authentication issues are logged for debugging
-
----
-
-## Angular Concepts Used
-
-- Components (Login, Register, Dashboard, Task Form)
-- Services (AuthService, TaskService)
-- HTTP Client for API integration
-- RxJS Observables and `subscribe`
-- Lifecycle Hooks (`ngOnInit`)
-- HTTP Interceptor for attaching JWT token
-- Route Guards for protected routes
-
----
-
-## Backend Concepts Used
-
-- REST API design using FastAPI
-- Dependency Injection (`Depends`)
-- Exception handling with HTTP responses
-- Logging using Python logging
-- OOP using SQLAlchemy models
-- JWT-based authentication and authorization
-
----
-
-## Database
-
-- PostgreSQL used as the primary database
-- SQLAlchemy ORM used for database operations
-- Demonstrates:
-  - Table creation
-  - Relationships (User → Tasks)
-  - CRUD operations
-
----
-
-## Git & GitHub
-
-- Multiple commits with meaningful messages
-- Feature branch used for development (`refactor/backend-frontend-fixes`)
-- Final code merged into `main` branch
+- Feature work done on branches: `refactor/backend-frontend-fixes`, `refactor-dashboard-template`, `fix-page-title`
+- Final production-ready code merged into `main`
