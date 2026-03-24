@@ -1,16 +1,16 @@
 /**
- * @summary Unified form for creating and updating tasks
- * Handles route parameter extraction for edit mode and manages form state
+ * @file task-form-component.ts
+ * @description Integrated form for both creating new tasks and updating existing ones
  */
-//#region Imports
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TaskService } from '../../service/task-service';
-import { AlertService } from '../../../../shared/alert.service';
-//#endregion
- 
+/**
+ * @summary Task editor component
+ * Manages form state, handles route parameterization for edit mode, and facilitates backend persistence
+ */
 @Component({
     selector: 'app-task-form-component',
     standalone: true,
@@ -18,25 +18,22 @@ import { AlertService } from '../../../../shared/alert.service';
     templateUrl: './task-form-component.html',
 })
 export class TaskFormComponent implements OnInit {
-    //#region Properties
-    taskForm: FormGroup;
-    isEditMode = false;
-    taskId?: number;
-    errorMessage = '';
-    successMessage = '';
-    loading = false;
-    minDate: string = new Date().toISOString().split('T')[0]; // today's date for due_date min
-    //#endregion
- 
-    //#region Methods
+    public taskForm: FormGroup;
+    public isEditMode = false;
+    public taskId?: number;
+    public loading = false;
+    public minDate: string = new Date().toISOString().split('T')[0];
+    /**
+     * Initializes the reactive form with rigorous validation constraints
+     */
+    // #region constructor
     constructor(
-        private fb: FormBuilder,
+        private formBuilder: FormBuilder,
         private taskService: TaskService,
-        private alertService: AlertService,
         private route: ActivatedRoute,
         private router: Router
     ) {
-        this.taskForm = this.fb.group({
+        this.taskForm = this.formBuilder.group({
             title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(200)]],
             description: ['', [Validators.maxLength(1000)]],
             status: ['TODO'],
@@ -44,9 +41,12 @@ export class TaskFormComponent implements OnInit {
             due_date: [''],
         });
     }
-
-    ngOnInit(): void {
-        // If an id param is in the URL, we are in edit mode — load the task
+    // #endregion
+    /**
+     * Detects operation mode (Insert vs Update) and pre-populates data if editing
+     */
+    // #region ngOnInit
+    public ngOnInit(): void {
         const id = this.route.snapshot.paramMap.get('id');
         if (id) {
             this.isEditMode = true;
@@ -59,55 +59,61 @@ export class TaskFormComponent implements OnInit {
                     });
                 },
                 error: () => {
-                    this.errorMessage = 'Failed to load task.';
+                    alert('Something went wrong');
                 },
             });
         }
     }
-
-    get title() { return this.taskForm.get('title')!; }
- 
+    // #endregion
     /**
-     * Persists task data to the server
-     * @returns void
+     * Getter for the title form control
+     * Utilized for template validation and state tracking
      */
-  onSubmit(): void {
-        if (this.taskForm.invalid) return;
-
-        const title = this.taskForm.value.title?.trim();
-        if (!title || title.length < 3) {
-            this.errorMessage = 'Title must be at least 3 characters.';
+    // #region title
+    public get title() {
+        return this.taskForm.get('title')!;
+    }
+    // #endregion
+    /**
+     * Submits task data to either the creation or update endpoint based on current mode
+     */
+    // #region onSubmit
+    public onSubmit(): void {
+        if (this.taskForm.invalid) {
             return;
         }
-
+        const title = this.taskForm.value.title?.trim();
+        if (!title || title.length < 3) {
+            alert('Title must be at least 3 characters.');
+            return;
+        }
         this.loading = true;
-        this.errorMessage = '';
         const formValue = { ...this.taskForm.value, title };
-
-        // Remove due_date if empty so the backend ignores it
-        if (!formValue.due_date) delete formValue.due_date;
-
-        // Use create or update depending on the mode
+        if (!formValue.due_date) {
+            delete formValue.due_date;
+        }
         const request$ = this.isEditMode && this.taskId
             ? this.taskService.updateTask(this.taskId, formValue)
             : this.taskService.createTask(formValue);
-
         request$.subscribe({
             next: () => {
-                this.alertService.show(this.isEditMode ? 'Task updated successfully' : 'Task created successfully');
+                alert(this.isEditMode ? 'Task updated successfully' : 'Task created successfully');
                 this.loading = false;
                 this.router.navigate(['/dashboard']);
             },
-            error: (err) => {
-                this.errorMessage = err.error?.detail || 'Operation failed.';
+            error: () => {
+                alert('Something went wrong');
                 this.loading = false;
             },
         });
     }
-
-    cancel(): void {
+    // #endregion
+    /**
+     * Reverts form state to default values for new task creation
+     */
+    // #region cancel
+    public cancel(): void {
         this.taskForm.reset({ status: 'TODO', priority: 'MEDIUM' });
-        this.errorMessage = '';
-        this.successMessage = '';
     }
+    // #endregion
 }

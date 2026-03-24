@@ -1,79 +1,76 @@
-// Manages user authentication state and communication with the /auth API
-//#region Imports
+/**
+ * @file auth-service.ts
+ * @description Orchestrates authentication workflows and session persistence logic
+ */
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { environment } from '../../../../environments/environment';
-//#endregion
- 
-//#region Interfaces
-
-export interface User {
-    id: number;
-    username: string;
-    email: string;
-    created_at: string;
-}
-
-export interface AuthResponse {
-    access_token: string;
-    token_type: string;
-}
-
-export interface RegisterRequest {
-    username: string;
-    email: string;
-    password: string;
-}
-
-export interface LoginRequest {
-    email: string;
-    password: string;
-}
-//#endregion
- 
-//#region Service
+import { Router } from '@angular/router';
+import { Observable, tap } from 'rxjs';
+import { APP_CONFIG } from '../../../types/constants';
+import { AuthResponse, User, LoginCredentials, RegisterData } from '../../../types/interface';
+/**
+ * @summary Authentication business logic provider
+ * Manages API communication for login/registration and handles JWT token lifecycle in local storage
+ */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-    private readonly apiUrl = `${environment.apiUrl}/auth`;
-
-    constructor(private http: HttpClient) { }
-
-    // POST /auth/register
+    private readonly authUrl = `${APP_CONFIG.apiUrl}/auth`;
     /**
-     * Registers a new user account
-     * @param data - User registration details (username, email, password)
-     * @returns Observable of the created User
+     * Injects dependencies for HTTP communication and navigation
      */
-    register(data: RegisterRequest): Observable<User> {
-        return this.http.post<User>(`${this.apiUrl}/register`, data);
+    // #region constructor
+    constructor(private httpClient: HttpClient, private router: Router) {
     }
-
-    // POST /auth/login → saves token to localStorage
+    // #endregion
     /**
-     * Authenticates user and stores JWT token
-     * @param data - Login credentials (email, password)
-     * @returns Observable of the authentication response
+     * Submits new user data to the registration endpoint
+     * @param userData Payload containing username, email, and password
      */
-    login(data: LoginRequest): Observable<AuthResponse> {
-        return this.http.post<AuthResponse>(`${this.apiUrl}/login`, data).pipe(
-            tap((res) => {
-                localStorage.setItem('token', res.access_token);
+    // #region register
+    public register(userData: RegisterData): Observable<User> {
+        return this.httpClient.post<User>(`${this.authUrl}/register`, userData);
+    }
+    // #endregion
+    /**
+     * Authenticates existing user and persists the returned JWT token
+     * @param credentials Payload containing email and password
+     */
+    // #region login
+    public login(credentials: LoginCredentials): Observable<AuthResponse> {
+        return this.httpClient.post<AuthResponse>(`${this.authUrl}/login`, credentials).pipe(
+            tap((response: AuthResponse) => {
+                if (response.access_token) {
+                    localStorage.setItem('token', response.access_token);
+                }
             })
         );
     }
-
-    logout(): void {
+    // #endregion
+    /**
+     * Clears authentication session and redirects to the login view
+     */
+    // #region logout
+    public logout(): void {
         localStorage.removeItem('token');
+        this.router.navigate(['/login']);
     }
-
-    getToken(): string | null {
+    // #endregion
+    /**
+     * Retrieves the current stored access token
+     * @returns JWT string or null if not authenticated
+     */
+    // #region getToken
+    public getToken(): string | null {
         return localStorage.getItem('token');
     }
-
-    isLoggedIn(): boolean {
+    // #endregion
+    /**
+     * Verifies if a user session is active
+     * @returns boolean indicating login state
+     */
+    // #region isLoggedIn
+    public isLoggedIn(): boolean {
         return !!this.getToken();
     }
+    // #endregion
 }
-//#endregion

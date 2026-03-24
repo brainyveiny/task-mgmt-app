@@ -1,29 +1,25 @@
 <div class="dashboard">
-
     <aside class="sidebar">
         <nav class="sidebar-nav">
             <a class="nav-item active" routerLink="/dashboard">Dashboard</a>
             <a class="nav-item" routerLink="/tasks/new">
-                <span class="nav-icon">+</span> New Task
+                <div class="nav-icon">+</div> New Task
             </a>
         </nav>
-        <button class="btn-logout" (click)="logout()">
-            <span class="material-icons">logout</span> Logout
+        <button class="btn-logout" (click)="confirmLogout()">
+            <div class="material-icons">logout</div> Logout
         </button>
     </aside>
-
     <main class="main-content">
-
         <header class="page-header">
             <div>
                 <h2>My Tasks</h2>
-                <p class="header-sub">Manage and track your work</p>
+                <div class="header-sub">Manage and track your work</div>
             </div>
         </header>
-
         <div class="toolbar">
             <input type="text" class="search-input" placeholder="Search tasks..."
-                [(ngModel)]="searchQuery" (input)="onSearch()" />
+                [(ngModel)]="searchQuery" (input)="onSearch()" (keyup.enter)="onSearchEnter()" />
             <select class="filter-select" [(ngModel)]="selectedStatus" (change)="onFilter()">
                 <option value="">All Status</option>
                 <option value="TODO">To Do</option>
@@ -31,102 +27,110 @@
                 <option value="DONE">Done</option>
             </select>
         </div>
-
-        <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
-        <div class="loading" *ngIf="loading">Loading tasks...</div>
-
-        <div class="kanban-board" [class.single-column]="selectedStatus !== ''">
-
-            <!-- TO DO COLUMN -->
-            <div class="kanban-column" *ngIf="selectedStatus === '' || selectedStatus === 'TODO'">
-                <div class="column-header todo-header">
-                    <h3>To Do</h3>
-                    <span class="count-badge">{{ todoTasks.length }}</span>
-                </div>
-                <div class="task-list"
-                    cdkDropList
-                    id="todo-list"
-                    [cdkDropListData]="todoTasks"
-                    [cdkDropListConnectedTo]="['inprogress-list', 'done-list']"
-                    (cdkDropListDropped)="onDrop($event, 'TODO')">
-                    <div class="task-card" *ngFor="let task of todoTasks" cdkDrag>
-                        <div class="task-top">
-                            <span class="task-title">{{ task.title }}</span>
-                            <span class="priority-badge" [ngClass]="getPriorityClass(task.priority)">
-                                {{ task.priority }}
-                            </span>
-                        </div>
-                        <p class="task-desc" *ngIf="task.description">{{ task.description }}</p>
-                        <p class="task-due" *ngIf="task.due_date">{{ task.due_date | date:'mediumDate' }}</p>
-                        <div class="task-actions">
-                            <button class="btn-edit" (click)="editTask(task.id)">Edit</button>
-                            <button class="btn-delete" (click)="deleteTask(task.id)">Delete</button>
-                        </div>
+        @if (loading) { <div class="loading">Loading tasks...</div> }
+        <div class="kanban-board" [class.single-column]="selectedStatus !== ''" cdkDropListGroup>
+            @if (selectedStatus === '' || selectedStatus === 'TODO') {
+                <div class="kanban-column">
+                    <div class="column-header todo-header">
+                        <h3>To Do</h3>
+                        <div class="count-badge">{{ todoTasks.length }}</div>
                     </div>
-                </div>
-                <div class="empty-col" *ngIf="todoTasks.length === 0">No tasks here</div>
-            </div>
-
-            <!-- IN PROGRESS COLUMN -->
-            <div class="kanban-column" *ngIf="selectedStatus === '' || selectedStatus === 'IN_PROGRESS'">
-                <div class="column-header inprogress-header">
-                    <h3>In Progress</h3>
-                    <span class="count-badge">{{ inProgressTasks.length }}</span>
-                </div>
-                <div class="task-list"
-                    cdkDropList
-                    id="inprogress-list"
-                    [cdkDropListData]="inProgressTasks"
-                    [cdkDropListConnectedTo]="['todo-list', 'done-list']"
-                    (cdkDropListDropped)="onDrop($event, 'IN_PROGRESS')">
-                    <div class="task-card" *ngFor="let task of inProgressTasks" cdkDrag>
-                        <div class="task-top">
-                            <span class="task-title">{{ task.title }}</span>
-                            <span class="priority-badge" [ngClass]="getPriorityClass(task.priority)">
-                                {{ task.priority }}
-                            </span>
-                        </div>
-                        <p class="task-desc" *ngIf="task.description">{{ task.description }}</p>
-                        <p class="task-due" *ngIf="task.due_date">{{ task.due_date | date:'mediumDate' }}</p>
-                        <div class="task-actions">
-                            <button class="btn-edit" (click)="editTask(task.id)">Edit</button>
-                            <button class="btn-delete" (click)="deleteTask(task.id)">Delete</button>
-                        </div>
+                    <div class="task-list"
+                        cdkDropList
+                        [cdkDropListData]="todoTasks"
+                        (cdkDropListDropped)="onDrop($event, 'TODO')">
+                        @for (task of todoTasks; track task.id) {
+                            <div class="task-card" cdkDrag>
+                                <div class="task-top">
+                                    <div class="task-title">{{ task.title }}</div>
+                                    <div class="priority-badge" [ngClass]="getPriorityClass(task.priority)">
+                                        {{ task.priority }}
+                                    </div>
+                                </div>
+                                @if (task.description) { <p class="task-desc">{{ task.description }}</p> }
+                                @if (task.due_date) { <p class="task-due">{{ task.due_date | date:'mediumDate' }}</p> }
+                                <div class="task-actions">
+                                    <button class="btn-edit" (click)="editTask(task.id)">Edit</button>
+                                    <button class="btn-delete" (click)="deleteTask(task.id)">Delete</button>
+                                </div>
+                            </div>
+                        }
                     </div>
+                    @if (todoTasks.length === 0) { <div class="empty-col">No tasks here</div> }
                 </div>
-                <div class="empty-col" *ngIf="inProgressTasks.length === 0">No tasks here</div>
-            </div>
-
-            <!-- DONE COLUMN -->
-            <div class="kanban-column" *ngIf="selectedStatus === '' || selectedStatus === 'DONE'">
-                <div class="column-header done-header">
-                    <h3>Done</h3>
-                    <span class="count-badge">{{ doneTasks.length }}</span>
-                </div>
-                <div class="task-list"
-                    cdkDropList
-                    id="done-list"
-                    [cdkDropListData]="doneTasks"
-                    [cdkDropListConnectedTo]="['todo-list', 'inprogress-list']"
-                    (cdkDropListDropped)="onDrop($event, 'DONE')">
-                    <div class="task-card done-card" *ngFor="let task of doneTasks" cdkDrag>
-                        <div class="task-top">
-                            <span class="task-title done-title">{{ task.title }}</span>
-                            <span class="priority-badge" [ngClass]="getPriorityClass(task.priority)">
-                                {{ task.priority }}
-                            </span>
-                        </div>
-                        <p class="task-desc" *ngIf="task.description">{{ task.description }}</p>
-                        <p class="task-due" *ngIf="task.due_date">{{ task.due_date | date:'mediumDate' }}</p>
-                        <div class="task-actions">
-                            <button class="btn-edit" (click)="editTask(task.id)">Edit</button>
-                            <button class="btn-delete" (click)="deleteTask(task.id)">Delete</button>
-                        </div>
+            }
+            @if (selectedStatus === '' || selectedStatus === 'IN_PROGRESS') {
+                <div class="kanban-column">
+                    <div class="column-header inprogress-header">
+                        <h3>In Progress</h3>
+                        <div class="count-badge">{{ inProgressTasks.length }}</div>
                     </div>
+                    <div class="task-list"
+                        cdkDropList
+                        [cdkDropListData]="inProgressTasks"
+                        (cdkDropListDropped)="onDrop($event, 'IN_PROGRESS')">
+                        @for (task of inProgressTasks; track task.id) {
+                            <div class="task-card" cdkDrag>
+                                <div class="task-top">
+                                    <div class="task-title">{{ task.title }}</div>
+                                    <div class="priority-badge" [ngClass]="getPriorityClass(task.priority)">
+                                        {{ task.priority }}
+                                    </div>
+                                </div>
+                                @if (task.description) { <p class="task-desc">{{ task.description }}</p> }
+                                @if (task.due_date) { <p class="task-due">{{ task.due_date | date:'mediumDate' }}</p> }
+                                <div class="task-actions">
+                                    <button class="btn-edit" (click)="editTask(task.id)">Edit</button>
+                                    <button class="btn-delete" (click)="deleteTask(task.id)">Delete</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    @if (inProgressTasks.length === 0) { <div class="empty-col">No tasks here</div> }
                 </div>
-                <div class="empty-col" *ngIf="doneTasks.length === 0">No tasks here</div>
-            </div>
-
+            }
+            @if (selectedStatus === '' || selectedStatus === 'DONE') {
+                <div class="kanban-column">
+                    <div class="column-header done-header">
+                        <h3>Done</h3>
+                        <div class="count-badge">{{ doneTasks.length }}</div>
+                    </div>
+                    <div class="task-list"
+                        cdkDropList
+                        [cdkDropListData]="doneTasks"
+                        (cdkDropListDropped)="onDrop($event, 'DONE')">
+                        @for (task of doneTasks; track task.id) {
+                            <div class="task-card done-card" cdkDrag>
+                                <div class="task-top">
+                                    <div class="task-title done-title">{{ task.title }}</div>
+                                    <div class="priority-badge" [ngClass]="getPriorityClass(task.priority)">
+                                        {{ task.priority }}
+                                    </div>
+                                </div>
+                                @if (task.description) { <p class="task-desc">{{ task.description }}</p> }
+                                @if (task.due_date) { <p class="task-due">{{ task.due_date | date:'mediumDate' }}</p> }
+                                <div class="task-actions">
+                                    <button class="btn-edit" (click)="editTask(task.id)">Edit</button>
+                                    <button class="btn-delete" (click)="deleteTask(task.id)">Delete</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    @if (doneTasks.length === 0) { <div class="empty-col">No tasks here</div> }
+                </div>
+            }
         </div>
     </main>
 </div>
+@if (showLogoutConfirmation) {
+    <div class="modal-backdrop">
+        <div class="modal-content">
+            <h3>Logout Confirmation</h3>
+            <p>Are you sure you want to logout?</p>
+            <div class="modal-actions">
+                <button class="btn-secondary" (click)="cancelLogout()">Cancel</button>
+                <button class="btn-danger" (click)="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+}

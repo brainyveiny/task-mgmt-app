@@ -1,4 +1,7 @@
-// Application Routes: defines all pages and the auth guard logic
+/**
+ * @file app.routes.ts
+ * @description Defines application navigation structure and security constraints
+ */
 import { inject } from '@angular/core';
 import { Routes, Router } from '@angular/router';
 import { AuthService } from './feature/login/service/auth-service';
@@ -6,8 +9,11 @@ import { LoginComponent } from './feature/login/components/login-component/login
 import { RegisterComponent } from './feature/register/components/register-component/register-component';
 import { DashboardComponent } from './feature/dashboard/components/dashboard-component/dashboard-component';
 import { TaskFormComponent } from './feature/task-form/components/task-form-component/task-form-component';
-
-// Access guard to prevent unauthenticated users from seeing protected pages
+/**
+ * Navigation guard ensuring authenticated access to protected features
+ * @returns boolean indicating if navigation can proceed
+ */
+// #region authGuard
 const authGuard = () => {
     const auth = inject(AuthService);
     const router = inject(Router);
@@ -17,26 +23,19 @@ const authGuard = () => {
     router.navigate(['/login']);
     return false;
 };
-
-// List of all paths in the app
+// #endregion
+/**
+ * @summary Primary routing manifest
+ * Maps URL paths to components and attaches security guards where required
+ */
+// #region routes
 export const routes: Routes = [
     { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
-    {
-        path: 'dashboard',
-        component: DashboardComponent,
-        canActivate: [authGuard],
-    },
-    {
-        path: 'tasks/new',
-        component: TaskFormComponent,
-        canActivate: [authGuard],
-    },
-    {
-        path: 'tasks/:id/edit',
-        component: TaskFormComponent,
-        canActivate: [authGuard],
-    },
+    { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+    { path: 'tasks/new', component: TaskFormComponent, canActivate: [authGuard] },
+    { path: 'tasks/:id/edit', component: TaskFormComponent, canActivate: [authGuard] },
     { path: '**', redirectTo: '/dashboard' },
 ];
+// #endregion

@@ -1,14 +1,17 @@
-// Main App component: serves as the root component with global alert and router outlet
+/**
+ * @file app.ts
+ * @description Root component for the task management application
+ */
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { AlertComponent } from './shared/alert.component';
-
+/**
+ * @summary Main application component
+ * Serves as the primary entry point for the component tree and manages the root router outlet
+ */
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, AlertComponent],
-  template: `
-    <app-alert></app-alert>
-    <router-outlet></router-outlet>
-  `
+  standalone: true,
+  imports: [RouterOutlet],
+  template: `<router-outlet></router-outlet>`
 })
 export class App { }

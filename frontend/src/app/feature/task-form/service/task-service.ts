@@ -1,83 +1,78 @@
-// Provider for task-related data operations and API interactions
-//#region Imports
+/**
+ * @file task-service.ts
+ * @description Data access layer for task-related CRUD operations and filtering
+ */
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-//#endregion
- 
-//#region Types & Interfaces
-
-export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
-export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
-
-export interface Task {
-    id: number;
-    title: string;
-    description?: string;
-    status: TaskStatus;
-    priority: TaskPriority;
-    due_date?: string;
-    created_at: string;
-    updated_at: string;
-}
-
-export interface TaskCreate {
-    title: string;
-    description?: string;
-    status?: TaskStatus;
-    priority?: TaskPriority;
-    due_date?: string;
-}
-
-export interface TaskUpdate {
-    title?: string;
-    description?: string;
-    status?: TaskStatus;
-    priority?: TaskPriority;
-    due_date?: string;
-}
-//#endregion
- 
-//#region Service
+import { APP_CONFIG } from '../../../types/constants';
+import { Task, TaskStatus, TaskUpdate, TaskCreate } from '../../../types/interface';
+/**
+ * @summary Task management data provider
+ * Handles API interactions for task lifecycle, including status-based filtering and search query integration
+ */
 @Injectable({ providedIn: 'root' })
 export class TaskService {
-    private readonly apiUrl = `${environment.apiUrl}/tasks`;
-
-    constructor(private http: HttpClient) { }
-
-    // GET /tasks — optional filters: task_status and search
+    private readonly apiUrl = `${APP_CONFIG.apiUrl}/tasks`;
     /**
-     * Retrieves tasks with optional search and status filters
-     * @param status - Filter by task status
-     * @param search - Filter by search query
-     * @returns Observable of Task array
+     * Injects the HTTP client for backend communication
      */
-    getTasks(status?: TaskStatus, search?: string): Observable<Task[]> {
-        let params = new HttpParams();
-        if (status) params = params.set('task_status', status);
-        if (search) params = params.set('search', search);
-        return this.http.get<Task[]>(this.apiUrl, { params });
+    // #region constructor
+    constructor(private httpClient: HttpClient) {
     }
-
-    // GET /tasks/:id
-    getTaskById(id: number): Observable<Task> {
-        return this.http.get<Task>(`${this.apiUrl}/${id}`);
+    // #endregion
+    /**
+     * Retrieves a list of tasks with applied server-side filtering
+     * @param status Optional filter for task status
+     * @param search Optional keyword search filter
+     */
+    // #region getTasks
+    public getTasks(status?: TaskStatus, search?: string): Observable<Task[]> {
+        let parameters = new HttpParams();
+        if (status) {
+            parameters = parameters.set('task_status', status);
+        }
+        if (search) {
+            parameters = parameters.set('search', search);
+        }
+        return this.httpClient.get<Task[]>(this.apiUrl, { params: parameters });
     }
-
-    // POST /tasks
-    createTask(data: TaskCreate): Observable<Task> {
-        return this.http.post<Task>(this.apiUrl, data);
+    // #endregion
+    /**
+     * Fetches a single task record by its unique identifier
+     * @param id Target task ID
+     */
+    // #region getTaskById
+    public getTaskById(id: number): Observable<Task> {
+        return this.httpClient.get<Task>(`${this.apiUrl}/${id}`);
     }
-
-    // PUT /tasks/:id
-    updateTask(id: number, data: TaskUpdate): Observable<Task> {
-        return this.http.put<Task>(`${this.apiUrl}/${id}`, data);
+    // #endregion
+    /**
+     * Persists a new task record to the backend
+     * @param data Initial task property set
+     */
+    // #region createTask
+    public createTask(data: TaskCreate): Observable<Task> {
+        return this.httpClient.post<Task>(this.apiUrl, data);
     }
-
-    // DELETE /tasks/:id
-    deleteTask(id: number): Observable<void> {
-        return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    // #endregion
+    /**
+     * Updates an existing task record with partial or full data
+     * @param id Target task ID
+     * @param data Set of properties to modify
+     */
+    // #region updateTask
+    public updateTask(id: number, data: TaskUpdate): Observable<Task> {
+        return this.httpClient.put<Task>(`${this.apiUrl}/${id}`, data);
     }
+    // #endregion
+    /**
+     * Permanently removes a task record from the backend
+     * @param id Target task ID
+     */
+    // #region deleteTask
+    public deleteTask(id: number): Observable<void> {
+        return this.httpClient.delete<void>(`${this.apiUrl}/${id}`);
+    }
+    // #endregion
 }
-//#endregion
