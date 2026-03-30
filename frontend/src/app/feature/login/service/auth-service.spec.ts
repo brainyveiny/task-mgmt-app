@@ -12,6 +12,7 @@ import { APP_CONFIG } from '../../../types/constants';
  * @summary Authentication service test suite
  * Verifies registration, login, logout, and token session management
  */
+
 // #region describe
 describe('AuthService', () => {
     let service: AuthService;
@@ -21,6 +22,7 @@ describe('AuthService', () => {
      * @summary Test environment initialization
      * Configures the testing module and resets session state before each test
      */
+
     // #region beforeEach
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -34,29 +36,35 @@ describe('AuthService', () => {
         localStorage.clear();
     });
     // #endregion
+
     /**
      * @summary Cleanup procedure
      * Verifies no pending HTTP requests and resets local storage
      */
+
     // #region afterEach
     afterEach(() => {
         httpMock.verify();
         localStorage.clear();
     });
     // #endregion
+
     /**
      * @summary Creation check
      * Verifies service instantiation
      */
+
     // #region create-test
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
     // #endregion
+
     /**
      * @summary Registration verification
      * Confirms correct API endpoint usage and payload mapping for new user creation
      */
+
     // #region register-tests
     describe('register', () => {
         it('should send a POST request to /auth/register', () => {
@@ -72,10 +80,12 @@ describe('AuthService', () => {
         });
     });
     // #endregion
+
     /**
      * @summary Login verification
      * Confirms credential submission and subsequent JWT token persistence in local storage
      */
+
     // #region login-tests
     describe('login', () => {
         it('should send a POST request to /auth/login', () => {
@@ -99,10 +109,12 @@ describe('AuthService', () => {
         });
     });
     // #endregion
+
     /**
      * @summary Logout verification
      * Confirms session termination and token removal
      */
+
     // #region logout-tests
     describe('logout', () => {
         it('should remove the token from localStorage', () => {
@@ -112,10 +124,12 @@ describe('AuthService', () => {
         });
     });
     // #endregion
+
     /**
      * @summary Token access verification
      * Confirms service correctly retrieves and identifies active sessions
      */
+
     // #region session-tests
     describe('session monitoring', () => {
         it('should return the token from localStorage via getToken()', () => {
@@ -128,5 +142,6 @@ describe('AuthService', () => {
         });
     });
     // #endregion
+
 });
 // #endregion

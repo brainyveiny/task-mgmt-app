@@ -14,6 +14,7 @@ import { APP_CONFIG } from '../../../../types/constants';
  * @summary Task form component test suite
  * Verifies form initialization, mode detection, and data pre-population for editing
  */
+
 // #region describe
 describe('TaskFormComponent', () => {
     let component: TaskFormComponent;
@@ -34,6 +35,7 @@ describe('TaskFormComponent', () => {
     /**
      * Helper to configure the testing module with dynamic route parameters
      */
+
     // #region setupModule
     function setupModule(routeId: string | null = null) {
         TestBed.configureTestingModule({
@@ -58,19 +60,23 @@ describe('TaskFormComponent', () => {
         router = TestBed.inject(Router);
     }
     // #endregion
+
     /**
      * @summary Cleanup procedure
      * Verifies that no pending HTTP requests remain after each test case
      */
+
     // #region afterEach
     afterEach(() => {
         httpMock.verify();
     });
     // #endregion
+
     /**
      * @summary Create mode verification
      * Confirms the form starts with blank/default state when no ID is provided in route
      */
+
     // #region create-mode-tests
     describe('create mode', () => {
         beforeEach(async () => {
@@ -83,10 +89,12 @@ describe('TaskFormComponent', () => {
         });
     });
     // #endregion
+
     /**
      * @summary Edit mode verification
      * Confirms the form fetches and populates existing data when a task ID is provided
      */
+
     // #region edit-mode-tests
     describe('edit mode', () => {
         beforeEach(async () => {
@@ -100,5 +108,6 @@ describe('TaskFormComponent', () => {
         });
     });
     // #endregion
+
 });
 // #endregion

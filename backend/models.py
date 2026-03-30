@@ -5,18 +5,24 @@ from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
+
+
 class TaskStatus(str, enum.Enum):
-# Enumeration representing the lifecycle stages of a task
+    # Enumeration representing the lifecycle stages of a task
     TODO = "TODO"
     IN_PROGRESS = "IN_PROGRESS"
     DONE = "DONE"
+
+
 class TaskPriority(str, enum.Enum):
-# Enumeration representing the relative importance of a task
+    # Enumeration representing the relative importance of a task
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
+
+
 class User(Base):
-# Domain model representing an authenticated system user and their associated task relationship
+    # Domain model representing an authenticated system user and their associated task relationship
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, nullable=False, index=True)
@@ -24,8 +30,10 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     tasks = relationship("Task", back_populates="owner", cascade="all, delete-orphan")
+
+
 class Task(Base):
-# Domain model representing a management unit with status, priority, and ownership attribution
+    # Domain model representing a management unit with status, priority, and ownership attribution
     __tablename__ = "tasks"
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(200), nullable=False)
