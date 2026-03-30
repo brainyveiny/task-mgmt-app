@@ -101,22 +101,37 @@ def update_task(
 ):
 # Performs a partial or complete update of an existing task's attributes if owned by the user
     check_task_rate_limit(request.client.host)
+
+    # Safety check — ensure task exists and belongs to the current user
     task = database_session.query(Task).filter(Task.id == task_id, Task.user_id == current_user.id).first()
     if not task:
         logger.warning(f"Task update rejected: Access denied or not found (Task: {task_id}, User: {current_user.id})")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Task could not be found for update."
+            detail="Task not found"
         )
-    if task_data.due_date and task_data.due_date < datetime.now():
-        logger.warning(f"Task update blocked: Past due date (User: {current_user.id})")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Due date cannot reside in the past."
-        )
-    update_data = task_data.model_dump(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(task, key, value)
+
+    # Handle due_date safely — parse and validate before assigning
+    if task_data.due_date:
+        try:
+            due_date_str = task_data.due_date.isoformat().replace("Z", "+00:00")
+            task.due_date = datetime.fromisoformat(due_date_str)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid due_date format"
+            )
+
+    # Update individual fields explicitly if provided
+    if task_data.title is not None:
+        task.title = task_data.title
+    if task_data.description is not None:
+        task.description = task_data.description
+    if task_data.status is not None:
+        task.status = task_data.status
+    if task_data.priority is not None:
+        task.priority = task_data.priority
+
     database_session.commit()
     database_session.refresh(task)
     logger.info(f"Task updated successfully for user_id: {current_user.id}")
