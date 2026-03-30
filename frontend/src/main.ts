@@ -9,6 +9,7 @@ import { App } from './app/app';
  * @summary Application bootstrap procedure
  * Initializes the root App component with the centralized provider configuration
  */
+
 // #region bootstrap
 bootstrapApplication(App, appConfig)
   .catch((err) => console.error(err));

@@ -38,3 +38,9 @@ Thumbs.db
 *.swp
 *.swo
 .history/
+
+# SQL Reference
+sql_queries_reference.sql
+
+# Database files (SQLite artifacts — never commit)
+*.db

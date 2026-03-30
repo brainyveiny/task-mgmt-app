@@ -14,6 +14,7 @@ import { APP_CONFIG } from '../../../../types/constants';
  * @summary Registration component test suite
  * Verifies form validaton accuracy and successful user creation redirection logic
  */
+
 // #region describe
 describe('RegisterComponent', () => {
     let component: RegisterComponent;
@@ -24,6 +25,7 @@ describe('RegisterComponent', () => {
      * @summary Test environment initialization
      * Initializes component instance and injects essential providers for unit testing
      */
+
     // #region beforeEach
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -41,29 +43,35 @@ describe('RegisterComponent', () => {
         fixture.detectChanges();
     });
     // #endregion
+
     /**
      * @summary Cleanup procedure
      * Verifies that no pending HTTP requests remain after each test case
      */
+
     // #region afterEach
     afterEach(() => {
         httpMock.verify();
         localStorage.clear();
     });
     // #endregion
+
     /**
      * @summary Creation check
      * Confirms that the component is instantiated correctly
      */
+
     // #region create-test
     it('should create', () => {
         expect(component).toBeTruthy();
     });
     // #endregion
+
     /**
      * @summary Submission logic tests
      * Verifies successful registration behavior, including backend communication and navigation
      */
+
     // #region onSubmit-tests
     describe('onSubmit', () => {
         it('should navigate to login on successful registration', () => {
@@ -81,5 +89,6 @@ describe('RegisterComponent', () => {
         });
     });
     // #endregion
+
 });
 // #endregion

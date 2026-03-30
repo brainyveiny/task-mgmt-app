@@ -14,6 +14,7 @@ import { APP_CONFIG } from '../../../../types/constants';
  * @summary Login component test suite
  * Verifies form validaton and successful authentication redirection
  */
+
 // #region describe
 describe('LoginComponent', () => {
     let component: LoginComponent;
@@ -24,6 +25,7 @@ describe('LoginComponent', () => {
      * @summary Test environment initialization
      * Initializes component and injects core test dependencies
      */
+
     // #region beforeEach
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -41,29 +43,35 @@ describe('LoginComponent', () => {
         fixture.detectChanges();
     });
     // #endregion
+
     /**
      * @summary Cleanup procedure
      * Verifies no pending HTTP requests and clears session tokens
      */
+
     // #region afterEach
     afterEach(() => {
         httpMock.verify();
         localStorage.clear();
     });
     // #endregion
+
     /**
      * @summary Creation check
      * Verifies the component instance is created successfully
      */
+
     // #region create-test
     it('should create', () => {
         expect(component).toBeTruthy();
     });
     // #endregion
+
     /**
      * @summary Submission logic tests
      * Verifies API communication and navigation upon valid credential entry
      */
+
     // #region onSubmit-tests
     describe('onSubmit', () => {
         it('should navigate to dashboard on successful login', () => {
@@ -76,5 +84,6 @@ describe('LoginComponent', () => {
         });
     });
     // #endregion
+
 });
 // #endregion

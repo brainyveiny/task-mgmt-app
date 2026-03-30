@@ -15,6 +15,7 @@ import { APP_CONFIG } from '../../../../types/constants';
  * @summary Dashboard component test suite
  * Verifies task loading, partition logic, search/filter functionality, and session management
  */
+
 // #region describe
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
@@ -31,6 +32,7 @@ describe('DashboardComponent', () => {
      * @summary Test environment initialization
      * Injects core providers for HTTP testing and navigation
      */
+
     // #region beforeEach
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -48,19 +50,23 @@ describe('DashboardComponent', () => {
         localStorage.setItem('token', 'test-token');
     });
     // #endregion
+
     /**
      * @summary Cleanup verification
      * Resets local storage and verifies pending HTTP requests
      */
+
     // #region afterEach
     afterEach(() => {
         httpMock.verify();
         localStorage.clear();
     });
     // #endregion
+
     /**
      * Helper to initialize the component with a pre-loaded task set
      */
+
     // #region initComponent
     function initComponent(): void {
         fixture.detectChanges();
@@ -68,20 +74,24 @@ describe('DashboardComponent', () => {
         req.flush(mockTasks);
     }
     // #endregion
+
     /**
      * @summary Identity verification
      * Confirms the component launches successfully
      */
+
     // #region create-test
     it('should create', () => {
         initComponent();
         expect(component).toBeTruthy();
     });
     // #endregion
+
     /**
      * @summary Initialization tests
      * Verifies data fetching on lifecycle init
      */
+
     // #region initialization-tests
     describe('initialization', () => {
         it('should load tasks on init', () => {
@@ -97,10 +107,12 @@ describe('DashboardComponent', () => {
         });
     });
     // #endregion
+
     /**
      * @summary Column partition verify
      * Confirms tasks are correctly categorized by status
      */
+
     // #region splitTasks-tests
     describe('splitTasks', () => {
         it('should split tasks into TODO, IN_PROGRESS, and DONE lists', () => {
@@ -111,10 +123,12 @@ describe('DashboardComponent', () => {
         });
     });
     // #endregion
+
     /**
      * @summary Debounced search verify
      * Confirms search triggers API calls with correct query parameters after debounce delay
      */
+
     // #region onSearch-tests
     describe('onSearch', () => {
         it('should trigger a debounced search', fakeAsync(() => {
@@ -128,10 +142,12 @@ describe('DashboardComponent', () => {
         }));
     });
     // #endregion
+
     /**
      * @summary Status filter verify
      * Confirms selecting a status reloads tasks with appropriate query params
      */
+
     // #region onFilter-tests
     describe('onFilter', () => {
         it('should reload tasks with selected status filter', () => {
@@ -144,10 +160,12 @@ describe('DashboardComponent', () => {
         });
     });
     // #endregion
+
     /**
      * @summary Task deletion verify
      * Confirms deletion sends DELETE request and refreshes view upon browser confirmation
      */
+
     // #region deleteTask-tests
     describe('deleteTask', () => {
         it('should send delete request and reload tasks after confirmation', () => {
@@ -163,10 +181,12 @@ describe('DashboardComponent', () => {
         });
     });
     // #endregion
+
     /**
      * @summary Session management verify
      * Confirms logout clears state and initiates navigation
      */
+
     // #region logout-tests
     describe('logout', () => {
         it('should set showLogoutConfirmation to true on confirmLogout()', () => {
@@ -188,10 +208,12 @@ describe('DashboardComponent', () => {
         });
     });
     // #endregion
+
     /**
      * @summary UI class mapping verify
      * Confirms priority strings map to correct visual style classes
      */
+
     // #region getPriorityClass-tests
     describe('getPriorityClass', () => {
         it('should return priority-low for LOW', () => {
@@ -200,5 +222,6 @@ describe('DashboardComponent', () => {
         });
     });
     // #endregion
+
 });
 // #endregion

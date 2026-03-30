@@ -4,6 +4,7 @@
  */
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+
 /**
  * @summary Main application component
  * Serves as the primary entry point for the component tree and manages the root router outlet
@@ -14,4 +15,5 @@ import { RouterOutlet } from '@angular/router';
   imports: [RouterOutlet],
   template: `<router-outlet></router-outlet>`
 })
+
 export class App { }

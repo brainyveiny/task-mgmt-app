@@ -8,18 +8,12 @@
         <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" novalidate>
             <div class="form-group">
                 <label for="task-title">Title *</label>
-                <input id="task-title" type="text" formControlName="title" placeholder="e.g., Complete project report"
-                    [class.invalid]="title.invalid && title.touched" />
-                @if (title.invalid && title.touched) {
-                    <div class="field-error">
-                        Title must be at least 3 characters.
-                    </div>
-                }
+                <input id="task-title" type="text" formControlName="title" [class.invalid]="title.invalid && title.touched" />
+                @if (title.invalid && title.touched) { <div class="field-error">Title must be at least 3 characters.</div> }
             </div>
             <div class="form-group">
                 <label for="task-description">Description</label>
-                <textarea id="task-description" formControlName="description" rows="4"
-                    placeholder="Optional task description..."></textarea>
+                <textarea id="task-description" formControlName="description" rows="4"></textarea>
             </div>
             <div class="form-row">
                 <div class="form-group">

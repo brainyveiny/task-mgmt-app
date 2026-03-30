@@ -4,42 +4,20 @@
     <div class="auth-subtitle">Sign in to your account</div>
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
       <div class="form-group">
-        <label for="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          formControlName="email"
-          placeholder="you@example.com"
-          [class.invalid]="email.invalid && email.touched"
-        />
-        @if (email.invalid && email.touched) {
-          <div class="field-error">
-            Invalid email.
-          </div>
-        }
+        <label for="email">Email ID</label>
+        <input id="email" type="email" formControlName="email" placeholder="Enter your Email ID" [class.invalid]="email.invalid && email.touched" />
+        @if (email.invalid && email.touched) { <div class="field-error">Valid Email ID is required.</div> }
       </div>
       <div class="form-group">
         <label for="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          formControlName="password"
-          placeholder="••••••••"
-          [class.invalid]="password.invalid && password.touched"
-        />
-        @if (password.invalid && password.touched) {
-          <div class="field-error">
-            Invalid password.
-          </div>
-        }
+        <input id="password" type="password" formControlName="password" placeholder="••••••••" [class.invalid]="password.invalid && password.touched" />
+        @if (password.invalid && password.touched) { <div class="field-error">Invalid password.</div> }
       </div>
       <button type="submit" class="btn-primary" [disabled]="loginForm.invalid || loading">
         @if (!loading) { <div>Sign In</div> }
         @if (loading) { <div class="spinner">Signing in...</div> }
       </button>
     </form>
-    <div class="auth-link">
-      Don't have an account? <a routerLink="/register">Create one</a>
-    </div>
+    <div class="auth-link">Don't have an account? <a routerLink="/register">Create one</a></div>
   </div>
 </div>

@@ -12,6 +12,7 @@ import { APP_CONFIG } from '../../../types/constants';
  * @summary Task service test suite
  * Verifies CRUD operations, URL construction, and query parameter serialization
  */
+
 // #region describe
 describe('TaskService', () => {
     let service: TaskService;
@@ -31,6 +32,7 @@ describe('TaskService', () => {
      * @summary Test environment initialization
      * Injects the task service and HTTP testing controller
      */
+
     // #region beforeEach
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -43,28 +45,34 @@ describe('TaskService', () => {
         httpMock = TestBed.inject(HttpTestingController);
     });
     // #endregion
+
     /**
      * @summary Cleanup procedure
      * Verifies that no unexpected HTTP requests remain pending
      */
+
     // #region afterEach
     afterEach(() => {
         httpMock.verify();
     });
     // #endregion
+
     /**
      * @summary Creation check
      * Confirms service instantiation success
      */
+
     // #region create-test
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
     // #endregion
+
     /**
      * @summary Retrieval logic tests
      * Verifies GET requests with and without optional status/search filters
      */
+
     // #region getTasks-tests
     describe('getTasks', () => {
         it('should send a GET request without parameters', () => {
@@ -87,10 +95,12 @@ describe('TaskService', () => {
         });
     });
     // #endregion
+
     /**
      * @summary Individual record access
      * Verifies fetching a specific task by ID
      */
+
     // #region getTaskById-tests
     describe('getTaskById', () => {
         it('should send a GET request to /tasks/:id', () => {
@@ -103,10 +113,12 @@ describe('TaskService', () => {
         });
     });
     // #endregion
+
     /**
      * @summary Persistence logic tests
      * Verifies POST, PUT, and DELETE operations for task lifecycle management
      */
+
     // #region crud-mutation-tests
     describe('mutations', () => {
         it('should send a POST request for createTask', () => {
@@ -131,5 +143,6 @@ describe('TaskService', () => {
         });
     });
     // #endregion
+
 });
 // #endregion
