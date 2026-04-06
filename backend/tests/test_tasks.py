@@ -1,6 +1,5 @@
 import pytest
 
-
 async def get_auth_token(client):
     await client.post("/auth/register", json={
         "username": "taskuser",
@@ -12,7 +11,6 @@ async def get_auth_token(client):
         "password": "testpass123"
     })
     return response.json()["access_token"]
-
 
 @pytest.mark.asyncio
 async def test_create_task(client):
@@ -28,7 +26,6 @@ async def test_create_task(client):
     assert data["title"] == "Test Task"
     assert data["status"] == "TODO"
 
-
 @pytest.mark.asyncio
 async def test_get_tasks(client):
     token = await get_auth_token(client)
@@ -42,7 +39,6 @@ async def test_get_tasks(client):
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 2
-
 
 @pytest.mark.asyncio
 async def test_update_task(client):
@@ -59,7 +55,6 @@ async def test_update_task(client):
     assert response.json()["title"] == "Updated Title"
     assert response.json()["status"] == "IN_PROGRESS"
 
-
 @pytest.mark.asyncio
 async def test_delete_task(client):
     token = await get_auth_token(client)
@@ -71,7 +66,6 @@ async def test_delete_task(client):
     assert response.status_code == 204
     get_response = await client.get("/tasks", headers={"Authorization": f"Bearer {token}"})
     assert len(get_response.json()) == 0
-
 
 @pytest.mark.asyncio
 async def test_unauthorized_access(client):

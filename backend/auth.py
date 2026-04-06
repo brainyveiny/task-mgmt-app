@@ -1,9 +1,15 @@
 # @file auth.py
 # @description Authentication controller managing user identity, registration, and session authorization
+
+# --- Standard Library ---
 import time
+
+# --- Third-Party ---
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+
+# --- Local ---
 from database import get_database_session
 from models import User
 from schemas import UserCreate, UserResponse, Token
@@ -14,7 +20,6 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 # Simple in-memory rate limiter for authentication attempts
 # Prevents rapid brute-force attacks on login and registration endpoints
 _auth_rate_limit = {}
-
 
 def check_rate_limit(client_id: str, limit: int = 5, window: int = 60):
     now = time.time()
@@ -29,11 +34,10 @@ def check_rate_limit(client_id: str, limit: int = 5, window: int = 60):
         )
     _auth_rate_limit[client_id].append(now)
 
-
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(request: Request, user_data: UserCreate, database_session: Session = Depends(get_database_session)):
-# Registers a new user while enforcing identity uniqueness and security constraints
-# Rate limited per IP to prevent automation-based account creation
+    # Registers a new user while enforcing identity uniqueness and security constraints
+    # Rate limited per IP to prevent automation-based account creation
     check_rate_limit(request.client.host, limit=10)
     existing_by_username = database_session.query(User).filter(User.username == user_data.username).first()
     if existing_by_username:
@@ -69,8 +73,8 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     database_session: Session = Depends(get_database_session)
 ):
-# Authenticates user credentials and issues a secure JWT access token
-# Rate limited per IP to prevent brute-force credential stuffing
+    # Authenticates user credentials and issues a secure JWT access token
+    # Rate limited per IP to prevent brute-force credential stuffing
     check_rate_limit(request.client.host)
     user = database_session.query(User).filter(
         (User.email == form_data.username) | (User.username == form_data.username)
@@ -87,13 +91,12 @@ def login(
     logger.info("User authenticated successfully.")
     return {"access_token": access_token, "token_type": "bearer"}
 
-
 @router.get("/me", response_model=UserResponse)
 def get_current_user(
     request: Request,
     database_session: Session = Depends(get_database_session)
 ):
-# Decodes the Bearer token and returns the authenticated user's full profile
+    # Decodes the Bearer token and returns the authenticated user's full profile
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         raise HTTPException(
@@ -110,7 +113,15 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     user_id = payload.get("sub")
-    user = database_session.query(User).filter(User.id == int(user_id)).first()
+    try:
+        user_id = int(user_id)
+    except (TypeError, ValueError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    user = database_session.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

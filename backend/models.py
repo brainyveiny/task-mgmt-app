@@ -1,11 +1,16 @@
 # @file models.py
 # @description SQLAlchemy domain models representing the application state and relational schema
+
+# --- Standard Library ---
 import enum
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Enum
+
+# --- Third-Party ---
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from database import Base
 
+# --- Local ---
+from database import Base
 
 class TaskStatus(str, enum.Enum):
     # Enumeration representing the lifecycle stages of a task
@@ -13,13 +18,11 @@ class TaskStatus(str, enum.Enum):
     IN_PROGRESS = "IN_PROGRESS"
     DONE = "DONE"
 
-
 class TaskPriority(str, enum.Enum):
     # Enumeration representing the relative importance of a task
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
-
 
 class User(Base):
     # Domain model representing an authenticated system user and their associated task relationship
@@ -30,7 +33,6 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     tasks = relationship("Task", back_populates="owner", cascade="all, delete-orphan")
-
 
 class Task(Base):
     # Domain model representing a management unit with status, priority, and ownership attribution

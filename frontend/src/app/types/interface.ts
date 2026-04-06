@@ -14,7 +14,6 @@ export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
 
 // #endregion
 
-
 /**
  * @summary User entity
  * Represents a registered user with system-generated metadata
@@ -29,7 +28,6 @@ export interface User {
 
 // #endregion
 
-
 /**
  * @summary Authentication response
  * Represents the JWT payload returned upon successful login
@@ -42,7 +40,6 @@ export interface AuthResponse {
 }
 
 // #endregion
-
 
 /**
  * @summary Registration model
@@ -58,7 +55,6 @@ export interface RegisterData {
 
 // #endregion
 
-
 /**
  * @summary Login credentials
  * Payload required for authenticating an existing user
@@ -71,7 +67,6 @@ export interface LoginCredentials {
 }
 
 // #endregion
-
 
 /**
  * @summary Task entity
@@ -92,7 +87,6 @@ export interface Task {
 
 // #endregion
 
-
 /**
  * @summary Task creation model
  * Subset of task properties allowed during initial persistence
@@ -108,7 +102,6 @@ export interface TaskCreate {
 }
 
 // #endregion
-
 
 /**
  * @summary Task update model

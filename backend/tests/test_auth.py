@@ -1,6 +1,5 @@
 import pytest
 
-
 @pytest.mark.asyncio
 async def test_register_user(client):
     response = await client.post("/auth/register", json={
@@ -12,7 +11,6 @@ async def test_register_user(client):
     data = response.json()
     assert data["username"] == "testuser"
     assert data["email"] == "test@gmail.com"
-
 
 @pytest.mark.asyncio
 async def test_register_duplicate_username(client):
@@ -29,7 +27,6 @@ async def test_register_duplicate_username(client):
     assert response.status_code == 409
     assert "Username already exists" in response.json()["detail"]
 
-
 @pytest.mark.asyncio
 async def test_register_duplicate_email(client):
     await client.post("/auth/register", json={
@@ -44,7 +41,6 @@ async def test_register_duplicate_email(client):
     })
     assert response.status_code == 409
     assert "Email already exists" in response.json()["detail"]
-
 
 @pytest.mark.asyncio
 async def test_login_user(client):
@@ -61,7 +57,6 @@ async def test_login_user(client):
     data = response.json()
     assert "access_token" in data
     assert data["token_type"] == "bearer"
-
 
 @pytest.mark.asyncio
 async def test_invalid_login(client):

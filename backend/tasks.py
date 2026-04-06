@@ -1,21 +1,26 @@
 # @file tasks.py
 # @description Task management controller facilitating CRUD operations and filter logic
+
+# --- Standard Library ---
 import time
-from typing import List, Optional
 from datetime import datetime
-from fastapi import APIRouter, Depends, Query, HTTPException, Request, status
+from typing import List, Optional
+
+# --- Third-Party ---
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
+
+# --- Local ---
 from database import get_database_session
-from models import Task, TaskStatus, User
-from schemas import TaskCreate, TaskUpdate, TaskResponse
-from utils import logger
 from dependencies import get_current_user
+from models import Task, TaskStatus, User
+from schemas import TaskCreate, TaskResponse, TaskUpdate
+from utils import logger
 
 router = APIRouter(prefix="/tasks", tags=["Task Management"])
 
 # Simple in-memory rate limiter for task mutation endpoints
 _task_rate_limit = {}
-
 
 def check_task_rate_limit(client_ip: str, limit: int = 20, window: int = 60):
     now = time.time()
@@ -30,7 +35,6 @@ def check_task_rate_limit(client_ip: str, limit: int = 20, window: int = 60):
         )
     _task_rate_limit[client_ip].append(now)
 
-
 @router.get("", response_model=List[TaskResponse])
 def get_tasks(
     task_status: Optional[TaskStatus] = Query(None),
@@ -40,8 +44,8 @@ def get_tasks(
     database_session: Session = Depends(get_database_session),
     current_user: User = Depends(get_current_user)
 ):
-# Retrieves a paginated, filtered collection of tasks owned by the current user session
-# Enforces strict ownership boundaries in the query layer
+    # Retrieves a paginated, filtered collection of tasks owned by the current user session
+    # Enforces strict ownership boundaries in the query layer
     query = database_session.query(Task).filter(Task.user_id == current_user.id)
     if task_status:
         query = query.filter(Task.status == task_status)
@@ -49,14 +53,13 @@ def get_tasks(
         query = query.filter(Task.title.ilike(f"%{search}%"))
     return query.order_by(Task.created_at.desc()).offset(offset).limit(limit).all()
 
-
 @router.get("/{task_id}", response_model=TaskResponse)
 def get_task(
     task_id: int,
     database_session: Session = Depends(get_database_session),
     current_user: User = Depends(get_current_user)
 ):
-# Fetches a singular task record verified by the owner identity
+    # Fetches a singular task record verified by the owner identity
     task = database_session.query(Task).filter(Task.id == task_id, Task.user_id == current_user.id).first()
     if not task:
         logger.warning(f"Task access denied or not found: {task_id} (User: {current_user.id})")
@@ -66,7 +69,6 @@ def get_task(
         )
     return task
 
-
 @router.post("", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
 def create_task(
     request: Request,
@@ -74,8 +76,8 @@ def create_task(
     database_session: Session = Depends(get_database_session),
     current_user: User = Depends(get_current_user)
 ):
-# Provisions a new task entry in the registry for the authenticated session user
-# Validates temporal constraints such as due dates
+    # Provisions a new task entry in the registry for the authenticated session user
+    # Validates temporal constraints such as due dates
     check_task_rate_limit(request.client.host)
     if task_data.due_date and task_data.due_date < datetime.now():
         logger.warning(f"Task creation blocked: Past due date (User: {current_user.id})")
@@ -90,7 +92,6 @@ def create_task(
     logger.info(f"Task successfully registered for user_id: {current_user.id}")
     return new_task
 
-
 @router.put("/{task_id}", response_model=TaskResponse)
 def update_task(
     request: Request,
@@ -99,7 +100,7 @@ def update_task(
     database_session: Session = Depends(get_database_session),
     current_user: User = Depends(get_current_user)
 ):
-# Performs a partial or complete update of an existing task's attributes if owned by the user
+    # Performs a partial or complete update of an existing task's attributes if owned by the user
     check_task_rate_limit(request.client.host)
 
     # Safety check — ensure task exists and belongs to the current user
@@ -137,7 +138,6 @@ def update_task(
     logger.info(f"Task updated successfully for user_id: {current_user.id}")
     return task
 
-
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(
     request: Request,
@@ -145,7 +145,7 @@ def delete_task(
     database_session: Session = Depends(get_database_session),
     current_user: User = Depends(get_current_user)
 ):
-# Permanently removes a task record from persistent storage for the authenticated user
+    # Permanently removes a task record from persistent storage for the authenticated user
     check_task_rate_limit(request.client.host)
     task = database_session.query(Task).filter(Task.id == task_id, Task.user_id == current_user.id).first()
     if not task:

@@ -55,7 +55,7 @@ export class AuthService {
 
     // #region isLoggedIn
     public isLoggedIn(): boolean {
-    // Validates both token presence and the JWT expiry claim to prevent stale sessions
+        // Validates both token presence and the JWT expiry claim to prevent stale sessions
         const token = this.getToken();
         if (!token) {
             return false;
@@ -81,12 +81,7 @@ export class AuthService {
 
     // #region getCurrentUser
     public getCurrentUser() {
-        const token = localStorage.getItem('token');
-        return this.httpClient.get<any>('http://localhost:8000/auth/me', {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
+        return this.httpClient.get<any>(`${this.authUrl}/me`);
     }
     // #endregion
 }

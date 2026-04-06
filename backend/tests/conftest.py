@@ -25,7 +25,6 @@ test_engine = create_engine(
 )
 TestSession = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
 
-
 def override_get_database_session():
     session = TestSession()
     try:
@@ -33,16 +32,13 @@ def override_get_database_session():
     finally:
         session.close()
 
-
 app.dependency_overrides[get_database_session] = override_get_database_session
-
 
 @pytest.fixture(autouse=True)
 def setup_database():
     Base.metadata.create_all(bind=test_engine)
     yield
     Base.metadata.drop_all(bind=test_engine)
-
 
 @pytest.fixture
 def client():
